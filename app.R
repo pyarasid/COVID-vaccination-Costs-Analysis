@@ -1540,7 +1540,7 @@ ui <- bootstrapPage(
                         tags$br(),tags$h4("Background"),
                         "Need to add information here",
                         tags$br(),tags$br(),tags$h4("Code"),
-                        "Code and input data used to generate this Shiny tool are available on Github.",
+                        "Code and input data used to generate this Shiny tool are available on", a(href="https://github.com/pyarasid/COVID-vaccination-Costs-Analysis", "Github."),
                         tags$br(),tags$br(),tags$h4("Selected references"),
                         "Need to add sources and links here",
                         tags$br(),tags$br(),tags$h4("Contributors"),
