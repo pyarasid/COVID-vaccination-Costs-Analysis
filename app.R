@@ -379,6 +379,8 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
                                   `Delivery cost 70% population`="Delivery cost",
                                   `spendIm`="Immunization cost"))
     
+    delivery_df_imu$Delivery_type <- factor(delivery_df_imu$Delivery_type, levels = c("Immunization cost", "Delivery cost"))
+    
     positions <- c(paste("Annual average spending \n on immunization (in", delivery_df_imu$Year[1],")"),"70% \n population", "Population \n at risk", "Health \n professionals")
     
     g2 <-  ggplot(delivery_df_imu,
@@ -388,8 +390,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
       scale_y_log10(labels = addUnits, n.breaks = 7)+
       scale_x_discrete(limits= positions)+
       scale_color_manual(values = c("Delivery cost"="#5ab4ac",
-                                    "Immunization cost"="steelblue"),
-                         breaks = c("Delivery cost" ))+
+                                    "Immunization cost"="steelblue"))+
       theme_minimal()+
       theme(axis.title.y=element_blank(),
             axis.title.x = element_blank(),
@@ -403,7 +404,6 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
     
     
     g2
-    
     
   } else if(cost_type_vaccine_imu=="Vaccine delivery cost only" & scale_type_imu =="Log" & cvx_vaccine_cost_imu !=FALSE){
     
@@ -433,6 +433,8 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
                                   `Delivery cost 70% population`="Delivery cost",
                                   `spendIm`="Immunization cost"))
     
+    delivery_df_imu$Delivery_type <- factor(delivery_df_imu$Delivery_type, levels = c("Immunization cost", "Delivery cost"))
+    
     positions <- c(paste("Annual average spending \n on immunization (in", delivery_df_imu$Year[1],")"),"70% \n population", "Population \n at risk", "Health \n professionals")
     
     g2 <-  ggplot(delivery_df_imu,
@@ -442,8 +444,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
       scale_y_log10(labels = addUnits, n.breaks = 7)+
       scale_x_discrete(limits= positions)+
       scale_color_manual(values = c("Delivery cost"="#5ab4ac",
-                                    "Immunization cost"="steelblue"),
-                         breaks = c("Delivery cost" ))+
+                                    "Immunization cost"="steelblue"))+
       theme_minimal()+
       theme(axis.title.y=element_blank(),
             axis.title.x = element_blank(),
@@ -454,8 +455,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
             plot.title = element_text(size=15, face="bold", hjust = 0),
             plot.title.position = "plot")+
       labs(title = paste("Annual immunization and COVID vaccination cost for", country_name_imu, "(US$) (M: Million, k: Thousand):"))
-    
-    
+
     g2
     
   }else if(cost_type_vaccine_imu=="Vaccine delivery cost only" & scale_type_imu =="Linear" & cvx_vaccine_cost_imu ==FALSE){
@@ -486,9 +486,10 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
                                   `Delivery cost 70% population`="Delivery cost",
                                   `spendIm`="Immunization cost"))
     
+    delivery_df_imu$Delivery_type <- factor(delivery_df_imu$Delivery_type, levels = c("Immunization cost", "Delivery cost"))
+    
     positions <- c(paste("Annual average spending \n on immunization (in", delivery_df_imu$Year[1],")"),"70% \n population", "Population \n at risk", "Health \n professionals")
-    
-    
+
     g2 <-  ggplot(delivery_df_imu,
                   aes(Vcc_cost, Delivery_cost))+
       geom_point(aes(color= Delivery_type),size=4)+
@@ -496,8 +497,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
       scale_y_continuous(labels = addUnits, n.breaks = 5)+
       scale_x_discrete(limits= positions)+
       scale_color_manual(values = c("Delivery cost"="#5ab4ac",
-                                    "Immunization cost"="steelblue"),
-                         breaks = c("Delivery cost" ))+
+                                    "Immunization cost"="steelblue"))+
       theme_minimal()+
       theme(axis.title.y=element_blank(),
             axis.title.x = element_blank(),
@@ -508,11 +508,9 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
             plot.title = element_text(size=15, face="bold", hjust = 0),
             plot.title.position = "plot")+
       labs(title = paste("Annual immunization and COVID vaccination cost for", country_name_imu, "(US$) (M: Million, k: Thousand):"))
-    
-    
+
     g2
-    
-    
+
   }else if (cost_type_vaccine_imu=="Vaccine delivery cost only" & scale_type_imu =="Linear" & cvx_vaccine_cost_imu !=FALSE){
     
     delivery_df_imu <- world_polygon_nogeom  %>%
@@ -541,6 +539,8 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
                                   `Delivery cost 70% population`="Delivery cost",
                                   `spendIm`="Immunization cost"))
     
+    delivery_df_imu$Delivery_type <- factor(delivery_df_imu$Delivery_type, levels = c("Immunization cost", "Delivery cost"))
+    
     positions <- c(paste("Annual average spending \n on immunization (in", delivery_df_imu$Year[1],")"),"70% \n population", "Population \n at risk", "Health \n professionals")
     
     g2 <-  ggplot(delivery_df_imu,
@@ -550,8 +550,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
       scale_y_continuous(labels = addUnits, n.breaks = 5)+
       scale_x_discrete(limits= positions)+
       scale_color_manual(values = c("Delivery cost"="#5ab4ac",
-                                    "Immunization cost"="steelblue"),
-                         breaks = c("Delivery cost" ))+
+                                    "Immunization cost"="steelblue"))+
       theme_minimal()+
       theme(axis.title.y=element_blank(),
             axis.title.x = element_blank(),
@@ -593,6 +592,8 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
                                      `Proc. cost  70% population`="Procurement cost",
                                      `spendIm`="Immunization cost"))
     
+    procurement_df_imu$Procurement_type <- factor(procurement_df_imu$Procurement_type, levels = c("Immunization cost", "Procurement cost"))
+    
     positions <- c(paste("Annual average spending \n on immunization (in", procurement_df_imu$Year[1],")"),"70% \n population", "Population \n at risk", "Health \n professionals")
     
     g2 <-  ggplot(procurement_df_imu,
@@ -602,8 +603,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
       scale_y_log10(labels = addUnits, n.breaks = 7)+
       scale_x_discrete(limits= positions)+
       scale_color_manual(values = c("Procurement cost"="#FB262A",
-                                    "Immunization cost"="steelblue"),
-                         breaks = c("Procurement cost" ))+
+                                    "Immunization cost"="steelblue"))+
       theme_minimal()+
       theme(axis.title.y=element_blank(),
             axis.title.x = element_blank(),
@@ -646,9 +646,10 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
                                      `Proc. cost  70% population`="Procurement cost",
                                      `spendIm`="Immunization cost"))
     
+    procurement_df_imu$Procurement_type <- factor(procurement_df_imu$Procurement_type, levels = c("Immunization cost", "Procurement cost"))
+    
     positions <- c(paste("Annual average spending \n on immunization (in", procurement_df_imu$Year[1],")"),"70% \n population", "Population \n at risk", "Health \n professionals")
-    
-    
+
     g2 <-  ggplot(procurement_df_imu,
                   aes(Vcc_cost, Procurement_cost))+
       geom_point(aes(color= Procurement_type),size=4)+
@@ -656,8 +657,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
       scale_y_log10(labels = addUnits, n.breaks = 7)+
       scale_x_discrete(limits= positions)+
       scale_color_manual(values = c("Procurement cost"="#FB262A",
-                                    "Immunization cost"="steelblue"),
-                         breaks = c("Procurement cost" ))+
+                                    "Immunization cost"="steelblue"))+
       theme_minimal()+
       theme(axis.title.y=element_blank(),
             axis.title.x = element_blank(),
@@ -699,6 +699,8 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
                                      `Proc. cost  70% population`="Procurement cost",
                                      `spendIm`="Immunization cost"))
     
+    procurement_df_imu$Procurement_type <- factor(procurement_df_imu$Procurement_type, levels = c("Immunization cost", "Procurement cost"))
+    
     positions <- c(paste("Annual average spending \n on immunization (in", procurement_df_imu$Year[1],")"),"70% \n population", "Population \n at risk", "Health \n professionals")
     
     g2 <-  ggplot(procurement_df_imu,
@@ -708,8 +710,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
       scale_y_continuous(labels = addUnits, n.breaks = 5)+
       scale_x_discrete(limits= positions)+
       scale_color_manual(values = c("Procurement cost"="#FB262A",
-                                    "Immunization cost"="steelblue"),
-                         breaks = c("Procurement cost" ))+
+                                    "Immunization cost"="steelblue"))+
       theme_minimal()+
       theme(axis.title.y=element_blank(),
             axis.title.x = element_blank(),
@@ -752,6 +753,8 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
                                      `Proc. cost  70% population`="Procurement cost",
                                      `spendIm`="Immunization cost"))
     
+    procurement_df_imu$Procurement_type <- factor(procurement_df_imu$Procurement_type, levels = c("Immunization cost", "Procurement cost"))
+    
     positions <- c(paste("Annual average spending \n on immunization (in", procurement_df_imu$Year[1],")"),"70% \n population", "Population \n at risk", "Health \n professionals")
     
     g2 <-  ggplot(procurement_df_imu,
@@ -761,8 +764,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
       scale_y_continuous(labels = addUnits, n.breaks = 5)+
       scale_x_discrete(limits= positions)+
       scale_color_manual(values = c("Procurement cost"="#FB262A",
-                                    "Immunization cost"="steelblue"),
-                         breaks = c("Procurement cost" ))+
+                                    "Immunization cost"="steelblue"))+
       theme_minimal()+
       theme(axis.title.y=element_blank(),
             axis.title.x = element_blank(),
@@ -866,6 +868,8 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
     
     plot_stack_imu_final <- full_join(plot_stack_imu_11, plot_stack__imu_12)
     
+    plot_stack_imu_final$type <- factor(plot_stack_imu_final$type, levels = c("Immunization cost", "Total cost", "Procurement cost" ,  "Delivery cost"))
+    
     positions <- c(paste("Annual average spending \n on immunization (in", plot_stack_imu$Year[1],")"),"70% \n population", "Population \n at risk", "Health \n professionals")
     
     g2 <-  ggplot(plot_stack_imu_final ,
@@ -876,8 +880,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
       scale_color_manual(values = c("Immunization cost"="steelblue",
                                     "Total cost"="orange",
                                     "Procurement cost"="#FB262A",
-                                    "Delivery cost"="#5ab4ac"),
-                         breaks = c("Total cost", "Procurement cost","Delivery cost" ))+
+                                    "Delivery cost"="#5ab4ac"))+
       scale_x_discrete(limits= positions)+
       theme_minimal()+
       theme(axis.title.y=element_blank(),
@@ -970,8 +973,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
                                  Total_type=="Total cost population at risk" ~"Population \n at risk",
                                  Total_type=="Total cost 70% population"~"70% \n population",
                                  Total_type=="spendIm"~paste("Annual average spending \n on immunization (in", Year,")")))
-    
-    
+
     plot_stack_imu <- procurement_df_imu %>% full_join(total_df_imu, by = c("Vcc_cost"="Vcc_cost")) %>%
       gather(type, type_cost, c(`Total cost`, `Procurement cost`)) %>% 
       select(Year.y, Vcc_cost, type, type_cost) %>% 
@@ -990,6 +992,8 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
     
     plot_stack_imu_final <- full_join(plot_stack_imu_11, plot_stack__imu_12)
     
+    plot_stack_imu_final$type <- factor(plot_stack_imu_final$type, levels = c("Immunization cost", "Total cost", "Procurement cost" ,  "Delivery cost"))
+    
     positions <- c(paste("Annual average spending \n on immunization (in", plot_stack_imu$Year[1],")"),"70% \n population", "Population \n at risk", "Health \n professionals")
     
     g2 <-  ggplot(plot_stack_imu_final ,
@@ -1000,8 +1004,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
       scale_color_manual(values = c("Immunization cost"="steelblue",
                                     "Total cost"="orange",
                                     "Procurement cost"="#FB262A",
-                                    "Delivery cost"="#5ab4ac"),
-                         breaks = c("Total cost", "Procurement cost","Delivery cost" ))+
+                                    "Delivery cost"="#5ab4ac"))+
       scale_x_discrete(limits= positions)+
       theme_minimal()+
       theme(axis.title.y=element_blank(),
@@ -1104,6 +1107,8 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
     
     plot_stack_imu_final <- full_join(plot_stack_imu_11, plot_stack__imu_12)
     
+    plot_stack_imu_final$type <- factor(plot_stack_imu_final$type, levels = c("Immunization cost", "Total cost", "Procurement cost" ,  "Delivery cost"))
+    
     positions <- c(paste("Annual average spending \n on immunization (in", plot_stack_imu$Year[1],")"),"70% \n population", "Population \n at risk", "Health \n professionals")
     
     g2 <-  ggplot(plot_stack_imu_final ,
@@ -1114,8 +1119,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
       scale_color_manual(values = c("Immunization cost"="steelblue",
                                     "Total cost"="orange",
                                     "Procurement cost"="#FB262A",
-                                    "Delivery cost"="#5ab4ac"),
-                         breaks = c("Total cost", "Procurement cost","Delivery cost" ))+
+                                    "Delivery cost"="#5ab4ac"))+
       scale_x_discrete(limits= positions)+
       theme_minimal()+
       theme(axis.title.y=element_blank(),
@@ -1129,7 +1133,6 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
       labs(title = paste("Annual immunization and COVID vaccination cost for", country_name_imu, "(US$) (M: Million, k: Thousand):"))
     
     g2
-    
     
   }else if(cost_type_vaccine_imu=="Vaccine procurement plus delivery cost" & scale_type_imu =="Linear" & cvx_vaccine_cost_imu!=FALSE){
     
@@ -1229,6 +1232,8 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
     
     plot_stack_imu_final <- full_join(plot_stack_imu_11, plot_stack__imu_12)
     
+    plot_stack_imu_final$type <- factor(plot_stack_imu_final$type, levels = c("Immunization cost", "Total cost", "Procurement cost" ,  "Delivery cost"))
+    
     positions <- c(paste("Annual average spending \n on immunization (in", plot_stack_imu$Year[1],")"),"70% \n population", "Population \n at risk", "Health \n professionals")
     
     g2 <-  ggplot(plot_stack_imu_final ,
@@ -1239,8 +1244,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
       scale_color_manual(values = c("Immunization cost"="steelblue",
                                     "Total cost"="orange",
                                     "Procurement cost"="#FB262A",
-                                    "Delivery cost"="#5ab4ac"),
-                         breaks = c("Total cost", "Procurement cost","Delivery cost" ))+
+                                    "Delivery cost"="#5ab4ac"))+
       scale_x_discrete(limits= positions)+
       theme_minimal()+
       theme(axis.title.y=element_blank(),
@@ -1335,7 +1339,7 @@ ui <- bootstrapPage(
                                         
                                         plotOutput("cost_plot", height = "200px", width = "100%")%>% withSpinner(),
                                         
-                                        tags$h6(tags$i(("The costs shown in the graph are based on our calculation from the baseline data which can found on `Data Explorer`
+                                        tags$h6(tags$i(("The costs shown in the graph are based on our calculation from the baseline data which can be found on `Data Explorer`
                                tab."))),
                                         
                                         
@@ -1517,7 +1521,7 @@ ui <- bootstrapPage(
                           
                           plotOutput("imu_cost_plot")%>% withSpinner(),
                           div(style = "margin-top:-35px"),
-                          radioGroupButtons("imu_scales", label = "", choices = c("Linear", "Log"), selected = "Log", size="xs"),
+                          radioGroupButtons("imu_scales", label = "", choices = c("Linear", "Log"), selected = "Linear", size="xs"),
                           
                           #tags$br(),
                           tags$br(),
@@ -1550,8 +1554,8 @@ ui <- bootstrapPage(
                         a(href="https://globalhealth.duke.edu/people/ogbuoji-osondu", "Osondu Ogbuoji,"),  "Assistant Research Professor, The Center for Policy Impact in Global Health, Duke University",tags$br(),
                         a(href= "https://globalhealth.duke.edu/people/yamey-gavin", "Gavin Yamey,"), "Director, The Center for Policy Impact in Global Health, Duke University",tags$br(),
                         tags$br(),tags$h4("Contact"),
-                        "cpighcoreteam@duke.edu",tags$br(),tags$br(),
-                        tags$a(href='https://centerforpolicyimpact.org/',tags$img(src = "CPIGH_Logo.png", width = "120px", height = "75px")), 
+                        "cpigh@duke.edu",tags$br(),tags$br(),
+                        tags$a(href='https://centerforpolicyimpact.org/',tags$img(src = "CPIGH_Logo.png", width = 100, height = 100)), 
                         tags$a(href='https://globalhealth.duke.edu/',tags$img(src = "dghi_logo.jpg", width = "150px", height = "75px"))
                       )
              )
