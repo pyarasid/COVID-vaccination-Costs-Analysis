@@ -1,6 +1,5 @@
 library(dplyr)
 library(ggplot2)
-library(plotly)
 library(ggrepel)
 library(magrittr)
 library(tidyr)
@@ -401,8 +400,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
             plot.title = element_text(size=15, face="bold", hjust = 0),
             plot.title.position = "plot")+
       labs(title = paste("Annual immunization and COVID vaccination cost for", country_name_imu, "(US$) (M: Million, k: Thousand):"))
-    
-    
+
     g2
     
   } else if(cost_type_vaccine_imu=="Vaccine delivery cost only" & scale_type_imu =="Log" & cvx_vaccine_cost_imu !=FALSE){
@@ -1555,8 +1553,8 @@ ui <- bootstrapPage(
                         a(href= "https://globalhealth.duke.edu/people/yamey-gavin", "Gavin Yamey,"), "Director, The Center for Policy Impact in Global Health, Duke University",tags$br(),
                         tags$br(),tags$h4("Contact"),
                         "cpigh@duke.edu",tags$br(),tags$br(),
-                        tags$a(href='https://centerforpolicyimpact.org/',tags$img(src = "CPIGH_Logo.png", width = 100, height = 100)), 
-                        tags$a(href='https://globalhealth.duke.edu/',tags$img(src = "dghi_logo.jpg", width = "150px", height = "75px"))
+                        tags$a(href='https://centerforpolicyimpact.org/',tags$img(src = "CPIGH_Logo.png", width = "350px")), 
+                        tags$a(href='https://globalhealth.duke.edu/',tags$img(src = "dghi_logo.jpg", width = "250px"))
                       )
              )
   )
