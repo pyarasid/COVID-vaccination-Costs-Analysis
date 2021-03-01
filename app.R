@@ -1552,7 +1552,8 @@ ui <- bootstrapPage(
                         a(href= "https://globalhealth.duke.edu/people/yamey-gavin", "Gavin Yamey,"), "Director, The Center for Policy Impact in Global Health, Duke University",tags$br(),
                         tags$br(),tags$h4("Contact"),
                         "cpigh@duke.edu",tags$br(),tags$br(),
-                        tags$a(href='https://centerforpolicyimpact.org/',tags$img(src = "CPIGH_Logo.png", width = "350px")), 
+                        tags$a(href='https://centerforpolicyimpact.org/',tags$img(src = "CPIGH_Logo.png", width = "350px")),tags$br(), tags$br(),
+                        
                         tags$a(href='https://globalhealth.duke.edu/',tags$img(src = "dghi_logo.jpg", width = "250px"))
                       )
              )
@@ -1711,8 +1712,9 @@ server <- function(input, output, session) {
     }else if (input$cvx_check!=FALSE){
       
       st_drop_geometry(filtered_world_polygon()) %>% 
-        dplyr::select(nam_lng,Cvx_lgb, num_dos, VCstDs_c, VCstDs_b,
+        dplyr::select(nam_lng, Cvx_lgb, num_dos, VCstDs_c, VCstDs_b,
                       DlCstDs, VC75PBC) %>% 
+        dplyr::mutate(cvx_price70p=ifelse(Cvx_lgb=="Yes", VCstDs_c, "Not eligible")) %>% 
         dplyr::mutate(VCstDs_c= dollar_format()(VCstDs_c),
                       VCstDs_b= dollar_format(accuracy = .1)(VCstDs_b),
                       DlCstDs=dollar_format(accuracy = .01)(DlCstDs),
@@ -1720,10 +1722,11 @@ server <- function(input, output, session) {
         dplyr::rename(Country= nam_lng,
                       `Number of doses required`= num_dos,
                       `COVAX eligibility`=Cvx_lgb, 
-                      `Vaccine price per dose (COVAX)`= VCstDs_c,
+                      `Vaccine price per dose (COVAX)`= cvx_price70p,
                       `Vaccine price per dose (Bilateral deal)`= VCstDs_b,
                       `Vaccine delivery cost per dose`= DlCstDs,
-                      `Total cost to vaccinate 70% population` = (VC75PBC))
+                      `Total cost to vaccinate 70% population` = (VC75PBC)) %>% 
+        dplyr::select(-VCstDs_c)
       
     }
     
@@ -1749,8 +1752,9 @@ server <- function(input, output, session) {
     }else if (input$cvx_check!=FALSE){
       
       st_drop_geometry(filtered_world_polygon()) %>% 
-        dplyr::select(nam_lng,Cvx_lgb, num_dos, VCstDs_c, VCstDs_b,
+        dplyr::select(nam_lng, Cvx_lgb, num_dos, VCstDs_c, VCstDs_b,
                       DlCstDs, VCstPRB) %>% 
+        dplyr::mutate(cvx_pricersk=ifelse(Cvx_lgb=="Yes", VCstDs_c, "Not eligible")) %>% 
         dplyr::mutate(VCstDs_c= dollar_format()(VCstDs_c),
                       VCstDs_b= dollar_format(accuracy = .1)(VCstDs_b),
                       DlCstDs=dollar_format(accuracy = .01)(DlCstDs),
@@ -1758,10 +1762,11 @@ server <- function(input, output, session) {
         dplyr::rename(Country= nam_lng,
                       `COVAX eligibility`=Cvx_lgb, 
                       `Number of doses required`= num_dos,
-                      `Vaccine price per dose (COVAX)`= VCstDs_c,
+                      `Vaccine price per dose (COVAX)`= cvx_pricersk,
                       `Vaccine price per dose (Bilateral deal)`= VCstDs_b,
                       `Vaccine delivery cost per dose`= DlCstDs,
-                      `Total cost to vaccinate population at risk` = (VCstPRB))
+                      `Total cost to vaccinate population at risk` = (VCstPRB)) %>% 
+        dplyr::select(-VCstDs_c)
       
     }
   })
@@ -1787,6 +1792,7 @@ server <- function(input, output, session) {
       st_drop_geometry(filtered_world_polygon()) %>% 
         dplyr::select(nam_lng,Cvx_lgb, num_dos, VCstDs_c, VCstDs_b,
                       DlCstDs, VCstHPB) %>% 
+        dplyr::mutate(cvx_pricehlth=ifelse(Cvx_lgb=="Yes", VCstDs_c, "Not eligible")) %>% 
         dplyr::mutate(VCstDs_c= dollar_format()(VCstDs_c),
                       VCstDs_b= dollar_format(accuracy = .1)(VCstDs_b),
                       DlCstDs=dollar_format(accuracy = .01)(DlCstDs),
@@ -1794,10 +1800,11 @@ server <- function(input, output, session) {
         dplyr::rename(Country= nam_lng,
                       `COVAX eligibility`=Cvx_lgb, 
                       `Number of doses required`= num_dos,
-                      `Vaccine price per dose (COVAX)`= VCstDs_c,
+                      `Vaccine price per dose (COVAX)`= cvx_pricehlth,
                       `Vaccine price per dose (Bilateral deal)`= VCstDs_b,
                       `Vaccine delivery cost per dose`= DlCstDs,
-                      `Total cost to vaccinate health professionals` = (VCstHPB)) 
+                      `Total cost to vaccinate health professionals` = (VCstHPB)) %>% 
+        dplyr::select(-VCstDs_c)
     }
   })
   
@@ -2082,7 +2089,7 @@ server <- function(input, output, session) {
   table_imu <- reactive({
     
     if (input$imu_cvx_check==FALSE){
-      
+ 
       df_table  <-  world_polygon_nogeom %>%
         dplyr::filter(nam_lng==input$imu_country_name) %>%
         dplyr::mutate(HghRskP=input$imu_risk_pop,
@@ -2103,6 +2110,7 @@ server <- function(input, output, session) {
       
       
     }else if(input$imu_cvx_check!=FALSE){
+
       
       df_table  <-  world_polygon_nogeom %>%
         dplyr::filter(nam_lng==input$imu_country_name) %>%
@@ -2111,7 +2119,8 @@ server <- function(input, output, session) {
                       num_dos=input$imu_doses_num,
                       VCstDs_b=input$imu_Vac_bilateral,
                       DlCstDs=input$imu_delivery_vaccine) %>%
-        dplyr::select(nam_lng,Cvx_lgb, HghRskP, NmHthPr, num_dos,VCstDs_c, VCstDs_b, DlCstDs) %>%
+        dplyr::select(nam_lng,Cvx_lgb, HghRskP, NmHthPr, num_dos, VCstDs_c, VCstDs_b, DlCstDs) %>%
+        dplyr::mutate(cvx_price=ifelse(Cvx_lgb=="Yes", VCstDs_c, "Not eligible")) %>% 
         dplyr::mutate(NmHthPr= comma_format()(NmHthPr),
                       DlCstDs=comma_format(accuracy = .01)(DlCstDs)) %>%
         dplyr::rename(`Country`=nam_lng,
@@ -2119,11 +2128,12 @@ server <- function(input, output, session) {
                       `Population at risk (%)`= HghRskP,
                       `No. of Health Professionals`= NmHthPr,
                       `No. of doses required`=num_dos,
-                      `Vaccine price per dose (COVAX, US$)` = VCstDs_c,
+                      `Vaccine price per dose (COVAX, US$)` = cvx_price,
                       `Vaccine price per dose (Bilateral, US$)`=VCstDs_b,
-                      `Delivery cost per dose (US$)`= DlCstDs)
+                      `Delivery cost per dose (US$)`= DlCstDs) %>% 
+        dplyr::select(-VCstDs_c)
       
-    }
+      }
     
   })
   
