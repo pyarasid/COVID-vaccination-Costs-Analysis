@@ -1504,13 +1504,13 @@ ui <- bootstrapPage(
                                         
                           ),
                           
-                          absolutePanel(id = "logo", class = "card", bottom = 10, left = 250, width = 80, fixed=TRUE, draggable = FALSE, height = "auto",
+                          absolutePanel(id = "logo", class = "card", bottom = 10, left = 280, width = 80, fixed=TRUE, draggable = FALSE, height = "auto",
                                         tags$a(href='https://centerforpolicyimpact.org/', tags$img(src='CPIGH_Logo.png',height='40',width='80'))),
                           
-                          absolutePanel(id = "logo", class = "card", bottom = 10, left = 340, width = 80, fixed=TRUE, draggable = FALSE, height = "auto",
+                          absolutePanel(id = "logo", class = "card", bottom = 10, left = 370, width = 80, fixed=TRUE, draggable = FALSE, height = "auto",
                                         actionButton("twitter_share", label = "", icon = icon("twitter"),style='padding:10px',
                                                      onclick = sprintf("window.open('%s')", 
-                                                                       "https://twitter.com/intent/tweet?text=%20Check out Duke University%20country vaccination%20cost%20mapper&url= https://exploring.shinyapps.io/COVID-19_price_4/%20%20%20&hashtags=coronavirus")))
+                                                                       "https://twitter.com/intent/tweet?text=%20Check out The Center for Policy Impact in Global Health, based at Duke University, COVID-19 country vaccination cost tracker:&url= https://centerforpolicyimpact.shinyapps.io/covid-vaccination-costs-analysis/%20%20%20&hashtags=coronavirus @DukeCPIGH @DukeGHI @GYamey @sid_dix @DukeU")))
                           
                       )
              ),
