@@ -160,7 +160,7 @@ st_write(world_polygon_new,"world_polygon_app.shp")
 `remaining % to reach herd immunity` <- 55
 `Number of doses needed` <- 2
 `Vaccine price per dose (COVAX, US$)` <- 3
-`Vaccine price per dose (Bilateral, US$)` <- 13.6
+`Vaccine price per dose (Bilateral, US$)` <- 9.95
 
 baseline_data <- read_excel("COVID 19 vaccine price tag_LIC_V8_01292021.xlsx", sheet = "Results") %>% 
   select(Country,`COVAX AMC eligible?`, `Baseline spending`,`Year`,`Total population`,`Adult population (>18)`,
@@ -178,7 +178,7 @@ baseline_data <- read_excel("COVID 19 vaccine price tag_LIC_V8_01292021.xlsx", s
   relocate(c(`% for herd immunity`, `% to be covered by COVAX`, `remaining % to reach herd immunity`,
              `Number of doses needed`, `Vaccine price per dose (COVAX, US$)`, `Vaccine price per dose (Bilateral, US$)`) , 
            .before= `Median delivery cost per dose`) %>% 
-  rename("Baseline spending on Immunization (2020 US$)"= `Baseline spending`,
+  rename("Baseline spending on Immunization"= `Baseline spending`,
          `Median delivery cost per dose (US$)`=`Median delivery cost per dose`,
          `Population % to be covered by COVAX`=`% to be covered by COVAX`,
          `Population % covered by bilateral deal`=`remaining % to reach herd immunity`,
@@ -189,7 +189,7 @@ baseline_data <- read_excel("COVID 19 vaccine price tag_LIC_V8_01292021.xlsx", s
          `Total cost per dose_bilateral deal  (vaccine cost + delivery cost) (US$)`=`Total cost per dose_bilateral deal  (vaccine cost + delivery cost)`) %>%
   mutate(`total_pop`=`Total population`,
          `num_health_prof`=`# of health professionals`) %>% 
-  mutate(`Baseline spending on Immunization (2020 US$)`= comma_format(accuracy=1.0)(`Baseline spending on Immunization (2020 US$)`),
+  mutate(`Baseline spending on Immunization`= comma_format(accuracy=1.0)(`Baseline spending on Immunization`),
          `Total cost to vaccinate all health professionals (US$)`= comma_format()(`num_health_prof`*`Total cost per dose_bilateral deal  (vaccine cost + delivery cost) (US$)`*
                                                                                     `Number of doses needed`),
          `Total cost to vaccinate population at risk (US$)`= comma_format()(`Adult population (>18)`*`High risk population %`*
@@ -211,9 +211,13 @@ baseline_data <- read_excel("COVID 19 vaccine price tag_LIC_V8_01292021.xlsx", s
          `Total cost per dose_COVAX  (vaccine cost + delivery cost) (US$)`= comma_format(accuracy=.01)(`Median delivery cost per dose (US$)`+`Vaccine price per dose (COVAX, US$)`),
          `Total cost per dose_bilateral deal  (vaccine cost + delivery cost) (US$)`= comma_format(accuracy=.01)(`Median delivery cost per dose (US$)`+
                                                                                                                   `Vaccine price per dose (Bilateral, US$)`),
-         `Median delivery cost per dose (US$)`= comma_format(accuracy=.01)(`Median delivery cost per dose (US$)`))%>% 
-  select(-c(`total_pop`, `num_health_prof`)) 
+         `Median delivery cost per dose (US$)`= comma_format(accuracy=.01)(`Median delivery cost per dose (US$)`),
+         `High risk population %`= `High risk population %`*100)%>% 
+  select(-c(`total_pop`, `num_health_prof`)) %>% 
+  select(-c(`Total cost per dose_COVAX  (vaccine cost + delivery cost) (US$)`,`Total cost per dose_bilateral deal  (vaccine cost + delivery cost) (US$)`,
+            `Total cost to vaccinate population at risk (US$)`,`Total cost to vaccinate all health professionals (US$)`,
+            `Total cost  to reach herd immunity (US$)`))
 
-write.xlsx(baseline_data, file = "baseline_data.xlsx")
+write.xlsx(baseline_data, file = "baseline_data.xlsx", row.names = FALSE)
 
 

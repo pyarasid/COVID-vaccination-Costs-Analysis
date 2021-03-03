@@ -26,11 +26,14 @@ library(shinycssloaders)
 # https://github.com/eparker12/nCoV_tracker/blob/master/app.R
 # https://github.com/rstudio/shiny-examples/tree/master/063-superzip-example
 
-#loading the shapefile created in the covid_data script
+#loading the shapefile created in the COVID-19_data script
 world_polygon_app <- st_read("world_polygon_app.shp") %>% 
   filter(!nam_lng %in% c("Swaziland", "Palestine")) %>% 
   mutate(nam_lng=recode(nam_lng, `Democratic Republic of the Congo`="Congo [DRC]"))%>% 
   select(-c("VCstHPB" , "VCstPRB" , "VC75PBC"))
+
+#updating bilateral vaccine price per dose
+world_polygon_app$VCstDs_b <- 9.95
 
 #getting world_polygon without the geomtry columns i.e get just the dataframe
 world_polygon_nogeom <- st_drop_geometry(world_polygon_app) 
@@ -46,69 +49,261 @@ addUnits <- function(n) {
   return(labels)
 }
 
-mill <-  scales::unit_format(unit = "M", scale = 1e-6)
+mill <-  scales::unit_format(unit = "M", scale = 1e-6, accuracy = .01)
 
 #Creating function for bar chart 
-cost_plot <- function(country_name, vaccine_cost_cvx, type_scales){
+cost_plot <- function(country_name, vaccine_cost_cvx){
   
-  if(type_scales =="Log" & vaccine_cost_cvx==FALSE){
+  # if(type_scales =="Log" & vaccine_cost_cvx==FALSE){
+  #   
+  #   total_df <- world_polygon_nogeom  %>%
+  #     filter(nam_lng==country_name) %>%
+  #     mutate(TtCstDB=(DlCstDs+VCstDs_b),
+  #            VCstHPB=(NmHthPr*TtCstDB*num_dos),
+  #            VCstPRB=(tot_pop*HghRskP*TtCstDB*num_dos),
+  #            VC75PBC=(tot_pop*TtCstDB*num_dos*pr_hrd_c)+(tot_pop*TtCstDB*num_dos*pr_hrd_b)) %>% 
+  #     select(Year, VCstHPB, VCstPRB, VC75PBC) %>% 
+  #     rename(`Total cost health professional`= `VCstHPB`,
+  #            `Total cost population at risk`= `VCstPRB`,
+  #            `Total cost 70% population`=`VC75PBC`) %>% 
+  #     gather(Total_type, `Total cost`, -Year) %>%
+  #     mutate(Vcc_cost= case_when(Total_type=="Total cost health professional"~ "Health \n professionals",
+  #                                Total_type=="Total cost population at risk" ~"High risk \n population",
+  #                                Total_type=="Total cost 70% population"~"70% \n population")) %>% 
+  #     mutate(`type_cost`="Total cost")
+  # 
+  #   g1 <-  ggplot(total_df ,
+  #                 aes(Vcc_cost, `Total cost`))+
+  #     geom_point(aes(color=`type_cost`), size=4)+
+  #     geom_text_repel(aes(label=mill(`Total cost`)),min.segment.length = Inf, box.padding = 0.5, size=2.5, fontface="bold")+
+  #     scale_y_log10(labels = addUnits, n.breaks = 7)+
+  #     scale_color_manual(values = c("Total cost"="#FB262A"))+
+  #     xlim("70% \n population", "High risk \n population", "Health \n professionals")+
+  #     theme_minimal()+
+  #     theme(axis.title.y=element_blank(),
+  #           axis.title.x = element_blank(),
+  #           axis.text.x = element_text(face = "bold", size = 8.5),
+  #           legend.title =  element_blank(),
+  #           legend.text = element_text(face="bold"),
+  #           legend.position = "bottom",
+  #           plot.title = element_text(size=11, face="bold", hjust = 0),
+  #           plot.title.position = "plot")+
+  #     labs(title = paste(country_name, ": Total cost to vaccinate \n","(2020 $US) (M: Million, k: Thousand)"))
+  #   
+  #   g1
+  #   
+  #   # procurement_df <- world_polygon_nogeom  %>%
+  #   #   filter(nam_lng==country_name) %>%
+  #   #   mutate(VCstDs_b=(VCstDs_b),
+  #   #          NmHthPr=(NmHthPr),
+  #   #          HghRskP=(HghRskP),
+  #   #          num_dos=(num_dos),
+  #   #          PrcCstHthPrf=(NmHthPr*VCstDs_b*num_dos),
+  #   #          PrcCstPpRsk=(tot_pop*HghRskP*VCstDs_b*num_dos),
+  #   #          PrcCst75Pp= (tot_pop*VCstDs_b*num_dos*pr_hrd_c)+(tot_pop*VCstDs_b*num_dos*pr_hrd_b)) %>%
+  #   #   select(Year,
+  #   #          PrcCstHthPrf, 
+  #   #          PrcCstPpRsk, 
+  #   #          PrcCst75Pp) %>%
+  #   #   rename(`Proc. cost health professional`= `PrcCstHthPrf`,
+  #   #          `Proc. cost population at risk`=`PrcCstPpRsk`,
+  #   #          `Proc. cost  70% population`=`PrcCst75Pp`) %>%
+  #   #   gather(Procurement, `Procurement cost`, matches("Proc"), -Year) %>% 
+  #   #   mutate(Vcc_cost= case_when(Procurement=="Proc. cost health professional"~ "Health \n professionals",
+  #   #                              Procurement=="Proc. cost population at risk" ~"High risk \n population",
+  #   #                              Procurement=="Proc. cost  70% population"~"70% \n population")) 
+  #   # 
+  #   # delivery_df <- 
+  #   #   world_polygon_nogeom  %>%
+  #   #   filter(nam_lng==country_name) %>%
+  #   #   mutate(DlCstDs=(DlCstDs),
+  #   #          NmHthPr=(NmHthPr),
+  #   #          HghRskP=(HghRskP),
+  #   #          num_dos=(num_dos),
+  #   #          DelCstHthPrf=(NmHthPr*DlCstDs*num_dos),
+  #   #          DelCstPpRsk=(tot_pop*HghRskP*DlCstDs*num_dos),
+  #   #          DelCst75Pp=(tot_pop*DlCstDs*num_dos*pr_hrd_c)+(tot_pop*DlCstDs*num_dos*pr_hrd_b)) %>%
+  #   #   select(Year, 
+  #   #          DelCstHthPrf, 
+  #   #          DelCstPpRsk,
+  #   #          DelCst75Pp) %>%
+  #   #   rename(`Delivery cost health professional`= `DelCstHthPrf`,
+  #   #          `Delivery cost population at risk`= `DelCstPpRsk`,
+  #   #          `Delivery cost 70% population`=`DelCst75Pp`) %>%
+  #   #   gather(Delivery, `Delivery cost`, matches("Delivery"), -Year) %>% 
+  #   #   mutate(Vcc_cost= case_when(Delivery=="Delivery cost health professional"~ "Health \n professionals",
+  #   #                              Delivery=="Delivery cost population at risk" ~"High risk \n population",
+  #   #                              Delivery=="Delivery cost 70% population"~"70% \n population")) 
+  #   # 
+  #   # plot_stack <- procurement_df %>% full_join(delivery_df, by = c("Vcc_cost"="Vcc_cost")) %>%
+  #   #   gather(type, type_cost, c(`Delivery cost`, `Procurement cost`)) %>%  
+  #   #   select(Year.y, Vcc_cost, type, type_cost) %>% 
+  #   #   rename(`Year`=`Year.y`)
+  #   
+  #   # g1 <-  ggplot(plot_stack ,
+  #   #               aes(Vcc_cost, type_cost))+
+  #   #   geom_point(aes(color= type),size=4)+
+  #   #   geom_text_repel(aes(label=mill(type_cost)),min.segment.length = Inf, box.padding = 0.5, size=2.5, fontface="bold")+
+  #   #   scale_y_log10(labels = addUnits, n.breaks = 7)+
+  #   #   scale_color_manual(values = c("Procurement cost"="#FB262A",
+  #   #                                 "Delivery cost"="#5ab4ac"))+
+  #   #   xlim("70% \n population", "High risk \n population", "Health \n professionals")+
+  #   #   theme_minimal()+
+  #   #   theme(axis.title.y=element_blank(),
+  #   #         axis.title.x = element_blank(),
+  #   #         axis.text.x = element_text(face = "bold", size = 8.5),
+  #   #         legend.title =  element_blank(),
+  #   #         legend.text = element_text(face="bold"),
+  #   #         legend.position = "bottom",
+  #   #         plot.title = element_text(size=11, face="bold", hjust = 0),
+  #   #         plot.title.position = "plot")+
+  #   #   labs(title = paste(country_name, ": Total cost to vaccinate \n","(2020 $US) (M: Million, k: Thousand)"))
+  #   # 
+  #   # g1
+  #   
+  # }else if(type_scales =="Log" & vaccine_cost_cvx!=FALSE){
+  #   
+  #   total_df <- world_polygon_nogeom  %>%
+  #     filter(nam_lng==country_name) %>%
+  #     mutate(DelCstHthPrf=(NmHthPr*DlCstDs*num_dos),
+  #            DelCstPpRsk=(tot_pop*HghRskP*DlCstDs*num_dos),
+  #            DelCst75Pp=(tot_pop*DlCstDs*num_dos*pr_hrd_c)+(tot_pop*DlCstDs*num_dos*pr_hrd_b),
+  #            PrcCstHthPrf=ifelse(Cvx_lgb=="Yes",(NmHthPr*VCstDs_c*num_dos),(NmHthPr*VCstDs_b*num_dos)),
+  #            PrcCstPpRsk=ifelse(Cvx_lgb=="Yes", (tot_pop*HghRskP*VCstDs_c*num_dos), (tot_pop*HghRskP*VCstDs_b*num_dos)),
+  #            PrcCst75Pp=ifelse(Cvx_lgb=="Yes", ((tot_pop*VCstDs_c*num_dos*pr_hrd_c)+(tot_pop*VCstDs_b*num_dos*pr_hrd_b)),
+  #                              ((tot_pop*VCstDs_b*num_dos*pr_hrd_c)+(tot_pop*VCstDs_b*num_dos*pr_hrd_b))),
+  #            VCstHPB=(DelCstHthPrf+ PrcCstHthPrf),
+  #            VCstPRB=(DelCstPpRsk+PrcCstPpRsk),
+  #            VC75PBC=(DelCst75Pp+PrcCst75Pp)) %>% 
+  #     select(Year, VCstHPB, VCstPRB, VC75PBC) %>% 
+  #     rename(`Total cost health professional`= `VCstHPB`,
+  #            `Total cost population at risk`= `VCstPRB`,
+  #            `Total cost 70% population`=`VC75PBC`) %>% 
+  #     gather(Total_type, `Total cost`, -Year) %>%
+  #     mutate(Vcc_cost= case_when(Total_type=="Total cost health professional"~ "Health \n professionals",
+  #                                Total_type=="Total cost population at risk" ~"High risk \n population",
+  #                                Total_type=="Total cost 70% population"~"70% \n population")) %>% 
+  #     mutate(`type_cost`="Total cost")
+  #   
+  #   g1 <-  ggplot(total_df ,
+  #                 aes(Vcc_cost, `Total cost`))+
+  #     geom_point(aes(color=`type_cost`), size=4)+
+  #     geom_text_repel(aes(label=mill(`Total cost`)),min.segment.length = Inf, box.padding = 0.5, size=2.5, fontface="bold")+
+  #     scale_y_log10(labels = addUnits, n.breaks = 7)+
+  #     scale_color_manual(values = c("Total cost"="#FB262A"))+
+  #     xlim("70% \n population", "High risk \n population", "Health \n professionals")+
+  #     theme_minimal()+
+  #     theme(axis.title.y=element_blank(),
+  #           axis.title.x = element_blank(),
+  #           axis.text.x = element_text(face = "bold", size = 8.5),
+  #           legend.title =  element_blank(),
+  #           legend.text = element_text(face="bold"),
+  #           legend.position = "bottom",
+  #           plot.title = element_text(size=11, face="bold", hjust = 0),
+  #           plot.title.position = "plot")+
+  #     labs(title = paste(country_name, ": Total cost to vaccinate \n","(2020 $US) (M: Million, k: Thousand)"))
+  #   
+  #   g1
+  #   
+  #   # procurement_df <- world_polygon_nogeom  %>%
+  #   #   filter(nam_lng==country_name) %>%
+  #   #   mutate(VCstDs_b=(VCstDs_b),
+  #   #          NmHthPr=(NmHthPr),
+  #   #          HghRskP=(HghRskP),
+  #   #          num_dos=(num_dos),
+  #   #          PrcCstHthPrf=ifelse(Cvx_lgb=="Yes",(NmHthPr*VCstDs_c*num_dos),(NmHthPr*VCstDs_b*num_dos)),
+  #   #          PrcCstPpRsk=ifelse(Cvx_lgb=="Yes", (tot_pop*HghRskP*VCstDs_c*num_dos), (tot_pop*HghRskP*VCstDs_b*num_dos)),
+  #   #          PrcCst75Pp= ifelse(Cvx_lgb=="Yes", ((tot_pop*VCstDs_c*num_dos*pr_hrd_c)+(tot_pop*VCstDs_b*num_dos*pr_hrd_b)),
+  #   #                             ((tot_pop*VCstDs_b*num_dos*pr_hrd_c)+(tot_pop*VCstDs_b*num_dos*pr_hrd_b)))) %>%
+  #   #   select(Year,
+  #   #          PrcCstHthPrf, 
+  #   #          PrcCstPpRsk, 
+  #   #          PrcCst75Pp) %>%
+  #   #   rename(`Proc. cost health professional`= `PrcCstHthPrf`,
+  #   #          `Proc. cost population at risk`=`PrcCstPpRsk`,
+  #   #          `Proc. cost  70% population`=`PrcCst75Pp`) %>%
+  #   #   gather(Procurement, `Procurement cost`, matches("Proc"), -Year) %>% 
+  #   #   mutate(Vcc_cost= case_when(Procurement=="Proc. cost health professional"~ "Health \n professionals",
+  #   #                              Procurement=="Proc. cost population at risk" ~"High risk \n population",
+  #   #                              Procurement=="Proc. cost  70% population"~"70% \n population")) 
+  #   # 
+  #   # delivery_df <- 
+  #   #   world_polygon_nogeom  %>%
+  #   #   filter(nam_lng==country_name) %>%
+  #   #   mutate(DlCstDs=(DlCstDs),
+  #   #          NmHthPr=(NmHthPr),
+  #   #          HghRskP=(HghRskP),
+  #   #          num_dos=(num_dos),
+  #   #          DelCstHthPrf=(NmHthPr*DlCstDs*num_dos),
+  #   #          DelCstPpRsk=(tot_pop*HghRskP*DlCstDs*num_dos),
+  #   #          DelCst75Pp=(tot_pop*DlCstDs*num_dos*pr_hrd_c)+(tot_pop*DlCstDs*num_dos*pr_hrd_b)) %>%
+  #   #   select(Year, 
+  #   #          DelCstHthPrf, 
+  #   #          DelCstPpRsk,
+  #   #          DelCst75Pp) %>%
+  #   #   rename(`Delivery cost health professional`= `DelCstHthPrf`,
+  #   #          `Delivery cost population at risk`= `DelCstPpRsk`,
+  #   #          `Delivery cost 70% population`=`DelCst75Pp`) %>%
+  #   #   gather(Delivery, `Delivery cost`, matches("Delivery"), -Year) %>% 
+  #   #   mutate(Vcc_cost= case_when(Delivery=="Delivery cost health professional"~ "Health \n professionals",
+  #   #                              Delivery=="Delivery cost population at risk" ~"High risk \n population",
+  #   #                              Delivery=="Delivery cost 70% population"~"70% \n population")) 
+  #   # 
+  #   # plot_stack <- procurement_df %>% full_join(delivery_df, by = c("Vcc_cost"="Vcc_cost")) %>%
+  #   #   gather(type, type_cost, c(`Delivery cost`, `Procurement cost`)) %>%  
+  #   #   select(Year.y, Vcc_cost, type, type_cost) %>% 
+  #   #   rename(`Year`=`Year.y`)
+  #   # 
+  #   # 
+  #   # g1 <-  ggplot(plot_stack ,
+  #   #               aes(Vcc_cost, type_cost))+
+  #   #   geom_point(aes(color= type),size=4)+
+  #   #   geom_text_repel(aes(label=mill(type_cost)),min.segment.length = Inf, box.padding = 0.5, size=2.5, fontface="bold")+
+  #   #   scale_y_log10(labels = addUnits, n.breaks = 7)+
+  #   #   scale_color_manual(values = c("Procurement cost"="#FB262A",
+  #   #                                 "Delivery cost"="#5ab4ac"))+
+  #   #   xlim("70% \n population", "High risk \n population", "Health \n professionals")+
+  #   #   theme_minimal()+
+  #   #   theme(axis.title.y=element_blank(),
+  #   #         axis.title.x = element_blank(),
+  #   #         axis.text.x = element_text(face = "bold", size = 8.5),
+  #   #         legend.title =  element_blank(),
+  #   #         legend.text = element_text(face="bold"),
+  #   #         legend.position = "bottom",
+  #   #         plot.title = element_text(size=11, face="bold", hjust = 0),
+  #   #         plot.title.position = "plot")+
+  #   #   labs(title = paste(country_name, ": Total cost to vaccinate \n","(2020 $US) (M: Million, k: Thousand)"))
+  #   # 
+  #   # g1
+  #   
+  # }
+  # 
+  
+  if(vaccine_cost_cvx==FALSE){
     
-    procurement_df <- world_polygon_nogeom  %>%
+    total_df <- world_polygon_nogeom  %>%
       filter(nam_lng==country_name) %>%
-      mutate(VCstDs_b=(VCstDs_b),
-             NmHthPr=(NmHthPr),
-             HghRskP=(HghRskP),
-             num_dos=(num_dos),
-             PrcCstHthPrf=(NmHthPr*VCstDs_b*num_dos),
-             PrcCstPpRsk=(tot_pop*HghRskP*VCstDs_b*num_dos),
-             PrcCst75Pp= (tot_pop*VCstDs_b*num_dos*pr_hrd_c)+(tot_pop*VCstDs_b*num_dos*pr_hrd_b)) %>%
-      select(Year,
-             PrcCstHthPrf, 
-             PrcCstPpRsk, 
-             PrcCst75Pp) %>%
-      rename(`Proc. cost health professional`= `PrcCstHthPrf`,
-             `Proc. cost population at risk`=`PrcCstPpRsk`,
-             `Proc. cost  70% population`=`PrcCst75Pp`) %>%
-      gather(Procurement, `Procurement cost`, matches("Proc"), -Year) %>% 
-      mutate(Vcc_cost= case_when(Procurement=="Proc. cost health professional"~ "Health \n professionals",
-                                 Procurement=="Proc. cost population at risk" ~"Population \n at risk",
-                                 Procurement=="Proc. cost  70% population"~"70% \n population")) 
+      mutate(TtCstDB=(DlCstDs+VCstDs_b),
+             VCstHPB=(NmHthPr*TtCstDB*num_dos),
+             VCstPRB=(tot_pop*HghRskP*TtCstDB*num_dos),
+             VC75PBC=(tot_pop*TtCstDB*num_dos*pr_hrd_c)+(tot_pop*TtCstDB*num_dos*pr_hrd_b)) %>% 
+      select(Year, VCstHPB, VCstPRB, VC75PBC) %>% 
+      rename(`Total cost health professional`= `VCstHPB`,
+             `Total cost population at risk`= `VCstPRB`,
+             `Total cost 70% population`=`VC75PBC`) %>% 
+      gather(Total_type, `Total cost`, -Year) %>%
+      mutate(Vcc_cost= case_when(Total_type=="Total cost health professional"~ "Health \n professionals",
+                                 Total_type=="Total cost population at risk" ~"High risk \n population",
+                                 Total_type=="Total cost 70% population"~"70% \n population")) %>% 
+      mutate(`type_cost`="Total cost")
     
-    delivery_df <- 
-      world_polygon_nogeom  %>%
-      filter(nam_lng==country_name) %>%
-      mutate(DlCstDs=(DlCstDs),
-             NmHthPr=(NmHthPr),
-             HghRskP=(HghRskP),
-             num_dos=(num_dos),
-             DelCstHthPrf=(NmHthPr*DlCstDs*num_dos),
-             DelCstPpRsk=(tot_pop*HghRskP*DlCstDs*num_dos),
-             DelCst75Pp=(tot_pop*DlCstDs*num_dos*pr_hrd_c)+(tot_pop*DlCstDs*num_dos*pr_hrd_b)) %>%
-      select(Year, 
-             DelCstHthPrf, 
-             DelCstPpRsk,
-             DelCst75Pp) %>%
-      rename(`Delivery cost health professional`= `DelCstHthPrf`,
-             `Delivery cost population at risk`= `DelCstPpRsk`,
-             `Delivery cost 70% population`=`DelCst75Pp`) %>%
-      gather(Delivery, `Delivery cost`, matches("Delivery"), -Year) %>% 
-      mutate(Vcc_cost= case_when(Delivery=="Delivery cost health professional"~ "Health \n professionals",
-                                 Delivery=="Delivery cost population at risk" ~"Population \n at risk",
-                                 Delivery=="Delivery cost 70% population"~"70% \n population")) 
-    
-    plot_stack <- procurement_df %>% full_join(delivery_df, by = c("Vcc_cost"="Vcc_cost")) %>%
-      gather(type, type_cost, c(`Delivery cost`, `Procurement cost`)) %>%  
-      select(Year.y, Vcc_cost, type, type_cost) %>% 
-      rename(`Year`=`Year.y`)
-    
-    g1 <-  ggplot(plot_stack ,
-                  aes(Vcc_cost, type_cost))+
-      geom_point(aes(color= type),size=4)+
-      geom_text_repel(aes(label=mill(type_cost)),min.segment.length = Inf, box.padding = 0.5, size=2.5, fontface="bold")+
-      scale_y_log10(labels = addUnits, n.breaks = 7)+
-      scale_color_manual(values = c("Procurement cost"="#FB262A",
-                                    "Delivery cost"="#5ab4ac"))+
-      xlim("70% \n population", "Population \n at risk", "Health \n professionals")+
+    g1 <-  ggplot(total_df ,
+                  aes(Vcc_cost, `Total cost`))+
+      geom_point(aes(color=`type_cost`), size=4)+
+      geom_text_repel(aes(label=mill(`Total cost`)),min.segment.length = Inf, box.padding = 0.5, size=3.5, fontface="bold")+
+      scale_y_continuous(labels = addUnits, n.breaks = 5)+
+      scale_color_manual(values = c("Total cost"="#FB262A"))+
+      xlim("70% \n population", "High risk \n population", "Health \n professionals")+
       theme_minimal()+
       theme(axis.title.y=element_blank(),
             axis.title.x = element_blank(),
@@ -118,140 +313,111 @@ cost_plot <- function(country_name, vaccine_cost_cvx, type_scales){
             legend.position = "bottom",
             plot.title = element_text(size=11, face="bold", hjust = 0),
             plot.title.position = "plot")+
-      labs(title = paste(country_name, ": Total cost to vaccinate \n","(in US$) (M: Million, k: Thousand)"))
+      labs(title = paste(country_name, ": Total cost to vaccinate \n","(2020 $US) (M: Million, k: Thousand)"))
     
     g1
     
-  }else if(type_scales =="Log" & vaccine_cost_cvx!=FALSE){
+    # 
+    # procurement_df <- world_polygon_nogeom  %>%
+    #   filter(nam_lng==country_name) %>%
+    #   mutate(VCstDs_b=(VCstDs_b),
+    #          NmHthPr=(NmHthPr),
+    #          HghRskP=(HghRskP),
+    #          num_dos=(num_dos),
+    #          PrcCstHthPrf=(NmHthPr*VCstDs_b*num_dos),
+    #          PrcCstPpRsk=(tot_pop*HghRskP*VCstDs_b*num_dos),
+    #          PrcCst75Pp= (tot_pop*VCstDs_b*num_dos*pr_hrd_c)+(tot_pop*VCstDs_b*num_dos*pr_hrd_b)) %>%
+    #   select(Year,
+    #          PrcCstHthPrf, 
+    #          PrcCstPpRsk, 
+    #          PrcCst75Pp) %>%
+    #   rename(`Proc. cost health professional`= `PrcCstHthPrf`,
+    #          `Proc. cost population at risk`=`PrcCstPpRsk`,
+    #          `Proc. cost  70% population`=`PrcCst75Pp`) %>%
+    #   gather(Procurement, `Procurement cost`, matches("Proc"), -Year) %>% 
+    #   mutate(Vcc_cost= case_when(Procurement=="Proc. cost health professional"~ "Health \n professionals",
+    #                              Procurement=="Proc. cost population at risk" ~"High risk \n population",
+    #                              Procurement=="Proc. cost  70% population"~"70% \n population")) 
+    # 
+    # delivery_df <- 
+    #   world_polygon_nogeom  %>%
+    #   filter(nam_lng==country_name) %>%
+    #   mutate(DlCstDs=(DlCstDs),
+    #          NmHthPr=(NmHthPr),
+    #          HghRskP=(HghRskP),
+    #          num_dos=(num_dos),
+    #          DelCstHthPrf=(NmHthPr*DlCstDs*num_dos),
+    #          DelCstPpRsk=(tot_pop*HghRskP*DlCstDs*num_dos),
+    #          DelCst75Pp=(tot_pop*DlCstDs*num_dos*pr_hrd_c)+(tot_pop*DlCstDs*num_dos*pr_hrd_b)) %>%
+    #   select(Year, 
+    #          DelCstHthPrf, 
+    #          DelCstPpRsk,
+    #          DelCst75Pp) %>%
+    #   rename(`Delivery cost health professional`= `DelCstHthPrf`,
+    #          `Delivery cost population at risk`= `DelCstPpRsk`,
+    #          `Delivery cost 70% population`=`DelCst75Pp`) %>%
+    #   gather(Delivery, `Delivery cost`, matches("Delivery"), -Year) %>% 
+    #   mutate(Vcc_cost= case_when(Delivery=="Delivery cost health professional"~ "Health \n professionals",
+    #                              Delivery=="Delivery cost population at risk" ~"High risk \n population",
+    #                              Delivery=="Delivery cost 70% population"~"70% \n population")) 
+    # 
+    # plot_stack <- procurement_df %>% full_join(delivery_df, by = c("Vcc_cost"="Vcc_cost")) %>%
+    #   gather(type, type_cost, c(`Delivery cost`, `Procurement cost`)) %>%  
+    #   select(Year.y, Vcc_cost, type, type_cost) %>% 
+    #   rename(`Year`=`Year.y`)
+    # 
+    # g1 <-  ggplot(plot_stack ,
+    #               aes(Vcc_cost, type_cost))+
+    #   geom_point(aes(color= type),size=4)+
+    #   geom_text_repel(aes(label=mill(type_cost)),min.segment.length = Inf, box.padding = 0.5, size=2.5, fontface="bold")+
+    #   scale_y_continuous(labels = addUnits, n.breaks = 5)+
+    #   scale_color_manual(values = c("Procurement cost"="#FB262A",
+    #                                 "Delivery cost"="#5ab4ac"))+
+    #   xlim("70% \n population", "High risk \n population", "Health \n professionals")+
+    #   theme_minimal()+
+    #   theme(axis.title.y=element_blank(),
+    #         axis.title.x = element_blank(),
+    #         axis.text.x = element_text(face = "bold", size = 8.5),
+    #         legend.title =  element_blank(),
+    #         legend.text = element_text(face="bold"),
+    #         legend.position = "bottom",
+    #         plot.title = element_text(size=11, face="bold", hjust = 0),
+    #         plot.title.position = "plot")+
+    #   labs(title = paste(country_name, ": Total cost to vaccinate \n","(2020 $US) (M: Million, k: Thousand)"))
+    # 
+    # g1
     
-    procurement_df <- world_polygon_nogeom  %>%
+  }else if (vaccine_cost_cvx!=FALSE){
+    
+    total_df <- world_polygon_nogeom  %>%
       filter(nam_lng==country_name) %>%
-      mutate(VCstDs_b=(VCstDs_b),
-             NmHthPr=(NmHthPr),
-             HghRskP=(HghRskP),
-             num_dos=(num_dos),
+      mutate(DelCstHthPrf=(NmHthPr*DlCstDs*num_dos),
+             DelCstPpRsk=(tot_pop*HghRskP*DlCstDs*num_dos),
+             DelCst75Pp=(tot_pop*DlCstDs*num_dos*pr_hrd_c)+(tot_pop*DlCstDs*num_dos*pr_hrd_b),
              PrcCstHthPrf=ifelse(Cvx_lgb=="Yes",(NmHthPr*VCstDs_c*num_dos),(NmHthPr*VCstDs_b*num_dos)),
              PrcCstPpRsk=ifelse(Cvx_lgb=="Yes", (tot_pop*HghRskP*VCstDs_c*num_dos), (tot_pop*HghRskP*VCstDs_b*num_dos)),
-             PrcCst75Pp= ifelse(Cvx_lgb=="Yes", ((tot_pop*VCstDs_c*num_dos*pr_hrd_c)+(tot_pop*VCstDs_b*num_dos*pr_hrd_b)),
-                                ((tot_pop*VCstDs_b*num_dos*pr_hrd_c)+(tot_pop*VCstDs_b*num_dos*pr_hrd_b)))) %>%
-      select(Year,
-             PrcCstHthPrf, 
-             PrcCstPpRsk, 
-             PrcCst75Pp) %>%
-      rename(`Proc. cost health professional`= `PrcCstHthPrf`,
-             `Proc. cost population at risk`=`PrcCstPpRsk`,
-             `Proc. cost  70% population`=`PrcCst75Pp`) %>%
-      gather(Procurement, `Procurement cost`, matches("Proc"), -Year) %>% 
-      mutate(Vcc_cost= case_when(Procurement=="Proc. cost health professional"~ "Health \n professionals",
-                                 Procurement=="Proc. cost population at risk" ~"Population \n at risk",
-                                 Procurement=="Proc. cost  70% population"~"70% \n population")) 
+             PrcCst75Pp=ifelse(Cvx_lgb=="Yes", ((tot_pop*VCstDs_c*num_dos*pr_hrd_c)+(tot_pop*VCstDs_b*num_dos*pr_hrd_b)),
+                               ((tot_pop*VCstDs_b*num_dos*pr_hrd_c)+(tot_pop*VCstDs_b*num_dos*pr_hrd_b))),
+             VCstHPB=(DelCstHthPrf+ PrcCstHthPrf),
+             VCstPRB=(DelCstPpRsk+PrcCstPpRsk),
+             VC75PBC=(DelCst75Pp+PrcCst75Pp)) %>% 
+      select(Year, VCstHPB, VCstPRB, VC75PBC) %>% 
+      rename(`Total cost health professional`= `VCstHPB`,
+             `Total cost population at risk`= `VCstPRB`,
+             `Total cost 70% population`=`VC75PBC`) %>% 
+      gather(Total_type, `Total cost`, -Year) %>%
+      mutate(Vcc_cost= case_when(Total_type=="Total cost health professional"~ "Health \n professionals",
+                                 Total_type=="Total cost population at risk" ~"High risk \n population",
+                                 Total_type=="Total cost 70% population"~"70% \n population")) %>% 
+      mutate(`type_cost`="Total cost")
     
-    delivery_df <- 
-      world_polygon_nogeom  %>%
-      filter(nam_lng==country_name) %>%
-      mutate(DlCstDs=(DlCstDs),
-             NmHthPr=(NmHthPr),
-             HghRskP=(HghRskP),
-             num_dos=(num_dos),
-             DelCstHthPrf=(NmHthPr*DlCstDs*num_dos),
-             DelCstPpRsk=(tot_pop*HghRskP*DlCstDs*num_dos),
-             DelCst75Pp=(tot_pop*DlCstDs*num_dos*pr_hrd_c)+(tot_pop*DlCstDs*num_dos*pr_hrd_b)) %>%
-      select(Year, 
-             DelCstHthPrf, 
-             DelCstPpRsk,
-             DelCst75Pp) %>%
-      rename(`Delivery cost health professional`= `DelCstHthPrf`,
-             `Delivery cost population at risk`= `DelCstPpRsk`,
-             `Delivery cost 70% population`=`DelCst75Pp`) %>%
-      gather(Delivery, `Delivery cost`, matches("Delivery"), -Year) %>% 
-      mutate(Vcc_cost= case_when(Delivery=="Delivery cost health professional"~ "Health \n professionals",
-                                 Delivery=="Delivery cost population at risk" ~"Population \n at risk",
-                                 Delivery=="Delivery cost 70% population"~"70% \n population")) 
-    
-    plot_stack <- procurement_df %>% full_join(delivery_df, by = c("Vcc_cost"="Vcc_cost")) %>%
-      gather(type, type_cost, c(`Delivery cost`, `Procurement cost`)) %>%  
-      select(Year.y, Vcc_cost, type, type_cost) %>% 
-      rename(`Year`=`Year.y`)
-    
-    
-    g1 <-  ggplot(plot_stack ,
-                  aes(Vcc_cost, type_cost))+
-      geom_point(aes(color= type),size=4)+
-      geom_text_repel(aes(label=mill(type_cost)),min.segment.length = Inf, box.padding = 0.5, size=2.5, fontface="bold")+
-      scale_y_log10(labels = addUnits, n.breaks = 7)+
-      scale_color_manual(values = c("Procurement cost"="#FB262A",
-                                    "Delivery cost"="#5ab4ac"))+
-      xlim("70% \n population", "Population \n at risk", "Health \n professionals")+
-      theme_minimal()+
-      theme(axis.title.y=element_blank(),
-            axis.title.x = element_blank(),
-            axis.text.x = element_text(face = "bold", size = 8.5),
-            legend.title =  element_blank(),
-            legend.text = element_text(face="bold"),
-            legend.position = "bottom",
-            plot.title = element_text(size=11, face="bold", hjust = 0),
-            plot.title.position = "plot")+
-      labs(title = paste(country_name, ": Total cost to vaccinate \n","(in US$) (M: Million, k: Thousand)"))
-    
-    g1
-    
-  }else if(type_scales =="Linear" & vaccine_cost_cvx==FALSE){
-    procurement_df <- world_polygon_nogeom  %>%
-      filter(nam_lng==country_name) %>%
-      mutate(VCstDs_b=(VCstDs_b),
-             NmHthPr=(NmHthPr),
-             HghRskP=(HghRskP),
-             num_dos=(num_dos),
-             PrcCstHthPrf=(NmHthPr*VCstDs_b*num_dos),
-             PrcCstPpRsk=(tot_pop*HghRskP*VCstDs_b*num_dos),
-             PrcCst75Pp= (tot_pop*VCstDs_b*num_dos*pr_hrd_c)+(tot_pop*VCstDs_b*num_dos*pr_hrd_b)) %>%
-      select(Year,
-             PrcCstHthPrf, 
-             PrcCstPpRsk, 
-             PrcCst75Pp) %>%
-      rename(`Proc. cost health professional`= `PrcCstHthPrf`,
-             `Proc. cost population at risk`=`PrcCstPpRsk`,
-             `Proc. cost  70% population`=`PrcCst75Pp`) %>%
-      gather(Procurement, `Procurement cost`, matches("Proc"), -Year) %>% 
-      mutate(Vcc_cost= case_when(Procurement=="Proc. cost health professional"~ "Health \n professionals",
-                                 Procurement=="Proc. cost population at risk" ~"Population \n at risk",
-                                 Procurement=="Proc. cost  70% population"~"70% \n population")) 
-    
-    delivery_df <- 
-      world_polygon_nogeom  %>%
-      filter(nam_lng==country_name) %>%
-      mutate(DlCstDs=(DlCstDs),
-             NmHthPr=(NmHthPr),
-             HghRskP=(HghRskP),
-             num_dos=(num_dos),
-             DelCstHthPrf=(NmHthPr*DlCstDs*num_dos),
-             DelCstPpRsk=(tot_pop*HghRskP*DlCstDs*num_dos),
-             DelCst75Pp=(tot_pop*DlCstDs*num_dos*pr_hrd_c)+(tot_pop*DlCstDs*num_dos*pr_hrd_b)) %>%
-      select(Year, 
-             DelCstHthPrf, 
-             DelCstPpRsk,
-             DelCst75Pp) %>%
-      rename(`Delivery cost health professional`= `DelCstHthPrf`,
-             `Delivery cost population at risk`= `DelCstPpRsk`,
-             `Delivery cost 70% population`=`DelCst75Pp`) %>%
-      gather(Delivery, `Delivery cost`, matches("Delivery"), -Year) %>% 
-      mutate(Vcc_cost= case_when(Delivery=="Delivery cost health professional"~ "Health \n professionals",
-                                 Delivery=="Delivery cost population at risk" ~"Population \n at risk",
-                                 Delivery=="Delivery cost 70% population"~"70% \n population")) 
-    
-    plot_stack <- procurement_df %>% full_join(delivery_df, by = c("Vcc_cost"="Vcc_cost")) %>%
-      gather(type, type_cost, c(`Delivery cost`, `Procurement cost`)) %>%  
-      select(Year.y, Vcc_cost, type, type_cost) %>% 
-      rename(`Year`=`Year.y`)
-    
-    g1 <-  ggplot(plot_stack ,
-                  aes(Vcc_cost, type_cost))+
-      geom_point(aes(color= type),size=4)+
-      geom_text_repel(aes(label=mill(type_cost)),min.segment.length = Inf, box.padding = 0.5, size=2.5, fontface="bold")+
+    g1 <-  ggplot(total_df ,
+                  aes(Vcc_cost, `Total cost`))+
+      geom_point(aes(color=`type_cost`), size=4)+
+      geom_text_repel(aes(label=mill(`Total cost`)),min.segment.length = Inf, box.padding = 0.5, size=3.5, fontface="bold")+
       scale_y_continuous(labels = addUnits, n.breaks = 5)+
-      scale_color_manual(values = c("Procurement cost"="#FB262A",
-                                    "Delivery cost"="#5ab4ac"))+
-      xlim("70% \n population", "Population \n at risk", "Health \n professionals")+
+      scale_color_manual(values = c("Total cost"="#FB262A"))+
+      xlim("70% \n population", "High risk \n population", "Health \n professionals")+
       theme_minimal()+
       theme(axis.title.y=element_blank(),
             axis.title.x = element_blank(),
@@ -261,90 +427,86 @@ cost_plot <- function(country_name, vaccine_cost_cvx, type_scales){
             legend.position = "bottom",
             plot.title = element_text(size=11, face="bold", hjust = 0),
             plot.title.position = "plot")+
-      labs(title = paste(country_name, ": Total cost to vaccinate \n","(in US$) (M: Million, k: Thousand)"))
+      labs(title = paste(country_name, ": Total cost to vaccinate \n","(2020 $US) (M: Million, k: Thousand)"))
     
     g1
     
-  }else if (type_scales =="Linear" & vaccine_cost_cvx!=FALSE){
     
-    procurement_df <- world_polygon_nogeom  %>%
-      filter(nam_lng==country_name) %>%
-      mutate(VCstDs_b=(VCstDs_b),
-             NmHthPr=(NmHthPr),
-             HghRskP=(HghRskP),
-             num_dos=(num_dos),
-             PrcCstHthPrf=ifelse(Cvx_lgb=="Yes",(NmHthPr*VCstDs_c*num_dos),(NmHthPr*VCstDs_b*num_dos)),
-             PrcCstPpRsk=ifelse(Cvx_lgb=="Yes", (tot_pop*HghRskP*VCstDs_c*num_dos), (tot_pop*HghRskP*VCstDs_b*num_dos)),
-             PrcCst75Pp= ifelse(Cvx_lgb=="Yes", ((tot_pop*VCstDs_c*num_dos*pr_hrd_c)+(tot_pop*VCstDs_b*num_dos*pr_hrd_b)),
-                                ((tot_pop*VCstDs_b*num_dos*pr_hrd_c)+(tot_pop*VCstDs_b*num_dos*pr_hrd_b)))) %>%
-      select(Year,
-             PrcCstHthPrf, 
-             PrcCstPpRsk, 
-             PrcCst75Pp) %>%
-      rename(`Proc. cost health professional`= `PrcCstHthPrf`,
-             `Proc. cost population at risk`=`PrcCstPpRsk`,
-             `Proc. cost  70% population`=`PrcCst75Pp`) %>%
-      gather(Procurement, `Procurement cost`, matches("Proc"), -Year) %>% 
-      mutate(Vcc_cost= case_when(Procurement=="Proc. cost health professional"~ "Health \n professionals",
-                                 Procurement=="Proc. cost population at risk" ~"Population \n at risk",
-                                 Procurement=="Proc. cost  70% population"~"70% \n population")) 
-    
-    delivery_df <- 
-      world_polygon_nogeom  %>%
-      filter(nam_lng==country_name) %>%
-      mutate(DlCstDs=(DlCstDs),
-             NmHthPr=(NmHthPr),
-             HghRskP=(HghRskP),
-             num_dos=(num_dos),
-             DelCstHthPrf=(NmHthPr*DlCstDs*num_dos),
-             DelCstPpRsk=(tot_pop*HghRskP*DlCstDs*num_dos),
-             DelCst75Pp=(tot_pop*DlCstDs*num_dos*pr_hrd_c)+(tot_pop*DlCstDs*num_dos*pr_hrd_b)) %>%
-      select(Year, 
-             DelCstHthPrf, 
-             DelCstPpRsk,
-             DelCst75Pp) %>%
-      rename(`Delivery cost health professional`= `DelCstHthPrf`,
-             `Delivery cost population at risk`= `DelCstPpRsk`,
-             `Delivery cost 70% population`=`DelCst75Pp`) %>%
-      gather(Delivery, `Delivery cost`, matches("Delivery"), -Year) %>% 
-      mutate(Vcc_cost= case_when(Delivery=="Delivery cost health professional"~ "Health \n professionals",
-                                 Delivery=="Delivery cost population at risk" ~"Population \n at risk",
-                                 Delivery=="Delivery cost 70% population"~"70% \n population")) 
-    
-    plot_stack <- procurement_df %>% full_join(delivery_df, by = c("Vcc_cost"="Vcc_cost")) %>%
-      gather(type, type_cost, c(`Delivery cost`, `Procurement cost`)) %>%  
-      select(Year.y, Vcc_cost, type, type_cost) %>% 
-      rename(`Year`=`Year.y`)
-  
-    g1 <-  ggplot(plot_stack ,
-                  aes(Vcc_cost, type_cost))+
-      geom_point(aes(color= type),size=4)+
-      geom_text_repel(aes(label=mill(type_cost)),min.segment.length = Inf, box.padding = 0.5, size=2.5, fontface="bold")+
-      scale_y_continuous(labels = addUnits, n.breaks = 5)+
-      scale_color_manual(values = c("Procurement cost"="#FB262A",
-                                    "Delivery cost"="#5ab4ac"))+
-      xlim("70% \n population", "Population \n at risk", "Health \n professionals")+
-      theme_minimal()+
-      theme(axis.title.y=element_blank(),
-            axis.title.x = element_blank(),
-            axis.text.x = element_text(face = "bold", size = 8.5),
-            legend.title =  element_blank(),
-            legend.text = element_text(face="bold"),
-            legend.position = "bottom",
-            plot.title = element_text(size=11, face="bold", hjust = 0),
-            plot.title.position = "plot")+
-      labs(title = paste(country_name, ": Total cost to vaccinate \n","(in US$) (M: Million, k: Thousand)"))
-    
-    g1
+    # procurement_df <- world_polygon_nogeom  %>%
+    #   filter(nam_lng==country_name) %>%
+    #   mutate(VCstDs_b=(VCstDs_b),
+    #          NmHthPr=(NmHthPr),
+    #          HghRskP=(HghRskP),
+    #          num_dos=(num_dos),
+    #          PrcCstHthPrf=ifelse(Cvx_lgb=="Yes",(NmHthPr*VCstDs_c*num_dos),(NmHthPr*VCstDs_b*num_dos)),
+    #          PrcCstPpRsk=ifelse(Cvx_lgb=="Yes", (tot_pop*HghRskP*VCstDs_c*num_dos), (tot_pop*HghRskP*VCstDs_b*num_dos)),
+    #          PrcCst75Pp= ifelse(Cvx_lgb=="Yes", ((tot_pop*VCstDs_c*num_dos*pr_hrd_c)+(tot_pop*VCstDs_b*num_dos*pr_hrd_b)),
+    #                             ((tot_pop*VCstDs_b*num_dos*pr_hrd_c)+(tot_pop*VCstDs_b*num_dos*pr_hrd_b)))) %>%
+    #   select(Year,
+    #          PrcCstHthPrf, 
+    #          PrcCstPpRsk, 
+    #          PrcCst75Pp) %>%
+    #   rename(`Proc. cost health professional`= `PrcCstHthPrf`,
+    #          `Proc. cost population at risk`=`PrcCstPpRsk`,
+    #          `Proc. cost  70% population`=`PrcCst75Pp`) %>%
+    #   gather(Procurement, `Procurement cost`, matches("Proc"), -Year) %>% 
+    #   mutate(Vcc_cost= case_when(Procurement=="Proc. cost health professional"~ "Health \n professionals",
+    #                              Procurement=="Proc. cost population at risk" ~"High risk \n population",
+    #                              Procurement=="Proc. cost  70% population"~"70% \n population")) 
+    # 
+    # delivery_df <- 
+    #   world_polygon_nogeom  %>%
+    #   filter(nam_lng==country_name) %>%
+    #   mutate(DlCstDs=(DlCstDs),
+    #          NmHthPr=(NmHthPr),
+    #          HghRskP=(HghRskP),
+    #          num_dos=(num_dos),
+    #          DelCstHthPrf=(NmHthPr*DlCstDs*num_dos),
+    #          DelCstPpRsk=(tot_pop*HghRskP*DlCstDs*num_dos),
+    #          DelCst75Pp=(tot_pop*DlCstDs*num_dos*pr_hrd_c)+(tot_pop*DlCstDs*num_dos*pr_hrd_b)) %>%
+    #   select(Year, 
+    #          DelCstHthPrf, 
+    #          DelCstPpRsk,
+    #          DelCst75Pp) %>%
+    #   rename(`Delivery cost health professional`= `DelCstHthPrf`,
+    #          `Delivery cost population at risk`= `DelCstPpRsk`,
+    #          `Delivery cost 70% population`=`DelCst75Pp`) %>%
+    #   gather(Delivery, `Delivery cost`, matches("Delivery"), -Year) %>% 
+    #   mutate(Vcc_cost= case_when(Delivery=="Delivery cost health professional"~ "Health \n professionals",
+    #                              Delivery=="Delivery cost population at risk" ~"High risk \n population",
+    #                              Delivery=="Delivery cost 70% population"~"70% \n population")) 
+    # 
+    # plot_stack <- procurement_df %>% full_join(delivery_df, by = c("Vcc_cost"="Vcc_cost")) %>%
+    #   gather(type, type_cost, c(`Delivery cost`, `Procurement cost`)) %>%  
+    #   select(Year.y, Vcc_cost, type, type_cost) %>% 
+    #   rename(`Year`=`Year.y`)
+    # 
+    # g1 <-  ggplot(plot_stack ,
+    #               aes(Vcc_cost, type_cost))+
+    #   geom_point(aes(color= type),size=4)+
+    #   geom_text_repel(aes(label=mill(type_cost)),min.segment.length = Inf, box.padding = 0.5, size=2.5, fontface="bold")+
+    #   scale_y_continuous(labels = addUnits, n.breaks = 5)+
+    #   scale_color_manual(values = c("Procurement cost"="#FB262A",
+    #                                 "Delivery cost"="#5ab4ac"))+
+    #   xlim("70% \n population", "High risk \n population", "Health \n professionals")+
+    #   theme_minimal()+
+    #   theme(axis.title.y=element_blank(),
+    #         axis.title.x = element_blank(),
+    #         axis.text.x = element_text(face = "bold", size = 8.5),
+    #         legend.title =  element_blank(),
+    #         legend.text = element_text(face="bold"),
+    #         legend.position = "bottom",
+    #         plot.title = element_text(size=11, face="bold", hjust = 0),
+    #         plot.title.position = "plot")+
+    #   labs(title = paste(country_name, ": Total cost to vaccinate \n","(2020 $US) (M: Million, k: Thousand)"))
+    # 
+    # g1
     
   }
 }
 
 
 #Creating immunization plot function=============
-# imu_cost_plot(input$imu_country_name,input$imu_cost_type, input$imu_delivery_vaccine, input$imu_cvx_check, input$imu_Vac_bilateral,
-#               input$imu_health_worker, input$imu_risk_pop, input$imu_doses_num, input$imu_scales)
-
 
 imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_imu, cvx_vaccine_cost_imu, blt_vaccine_cost_imu,
                           health_prof_imu, pop_risky_imu, number_vaccine_doses_imu, scale_type_imu){
@@ -369,7 +531,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
              `Delivery cost 70% population`=`DelCst75Pp`) %>%
       gather(Delivery_type, Delivery_cost, -Year) %>% 
       mutate(Vcc_cost= case_when(Delivery_type=="Delivery cost health professional"~ "Health \n professionals",
-                                 Delivery_type=="Delivery cost population at risk" ~"Population \n at risk",
+                                 Delivery_type=="Delivery cost population at risk" ~"High risk \n population",
                                  Delivery_type=="Delivery cost 70% population"~"70% \n population",
                                  Delivery_type=="spendIm"~paste("Annual average spending \n on immunization (in", Year, ")"))) %>% 
       mutate(Delivery_type=recode(Delivery_type, `Delivery cost health professional`="Delivery cost",
@@ -379,7 +541,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
     
     delivery_df_imu$Delivery_type <- factor(delivery_df_imu$Delivery_type, levels = c("Immunization cost", "Delivery cost"))
     
-    positions <- c(paste("Annual average spending \n on immunization (in", delivery_df_imu$Year[1],")"),"70% \n population", "Population \n at risk", "Health \n professionals")
+    positions <- c(paste("Annual average spending \n on immunization (in", delivery_df_imu$Year[1],")"),"70% \n population", "High risk \n population", "Health \n professionals")
     
     g2 <-  ggplot(delivery_df_imu,
                   aes(Vcc_cost, Delivery_cost))+
@@ -398,7 +560,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
             legend.position = "bottom",
             plot.title = element_text(size=15, face="bold", hjust = 0),
             plot.title.position = "plot")+
-      labs(title = paste("Annual immunization and COVID vaccination cost for", country_name_imu, "(US$) (M: Million, k: Thousand):"))
+      labs(title = paste("Annual immunization and COVID-19-19 vaccination cost for", country_name_imu, "(2020 $US) (M: Million, k: Thousand):"))
 
     g2
     
@@ -422,7 +584,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
              `Delivery cost 70% population`=`DelCst75Pp`) %>%
       gather(Delivery_type, Delivery_cost, -Year) %>% 
       mutate(Vcc_cost= case_when(Delivery_type=="Delivery cost health professional"~ "Health \n professionals",
-                                 Delivery_type=="Delivery cost population at risk" ~"Population \n at risk",
+                                 Delivery_type=="Delivery cost population at risk" ~"High risk \n population",
                                  Delivery_type=="Delivery cost 70% population"~"70% \n population",
                                  Delivery_type=="spendIm"~paste("Annual average spending \n on immunization (in", Year, ")"))) %>% 
       mutate(Delivery_type=recode(Delivery_type, `Delivery cost health professional`="Delivery cost",
@@ -432,7 +594,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
     
     delivery_df_imu$Delivery_type <- factor(delivery_df_imu$Delivery_type, levels = c("Immunization cost", "Delivery cost"))
     
-    positions <- c(paste("Annual average spending \n on immunization (in", delivery_df_imu$Year[1],")"),"70% \n population", "Population \n at risk", "Health \n professionals")
+    positions <- c(paste("Annual average spending \n on immunization (in", delivery_df_imu$Year[1],")"),"70% \n population", "High risk \n population", "Health \n professionals")
     
     g2 <-  ggplot(delivery_df_imu,
                   aes(Vcc_cost, Delivery_cost))+
@@ -451,7 +613,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
             legend.position = "bottom",
             plot.title = element_text(size=15, face="bold", hjust = 0),
             plot.title.position = "plot")+
-      labs(title = paste("Annual immunization and COVID vaccination cost for", country_name_imu, "(US$) (M: Million, k: Thousand):"))
+      labs(title = paste("Annual immunization and COVID-19-19 vaccination cost for", country_name_imu, "(2020 $US) (M: Million, k: Thousand):"))
 
     g2
     
@@ -475,7 +637,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
              `Delivery cost 70% population`=`DelCst75Pp`) %>%
       gather(Delivery_type, Delivery_cost, -Year) %>% 
       mutate(Vcc_cost= case_when(Delivery_type=="Delivery cost health professional"~ "Health \n professionals",
-                                 Delivery_type=="Delivery cost population at risk" ~"Population \n at risk",
+                                 Delivery_type=="Delivery cost population at risk" ~"High risk \n population",
                                  Delivery_type=="Delivery cost 70% population"~"70% \n population",
                                  Delivery_type=="spendIm"~paste("Annual average spending \n on immunization (in", Year, ")"))) %>% 
       mutate(Delivery_type=recode(Delivery_type, `Delivery cost health professional`="Delivery cost",
@@ -485,7 +647,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
     
     delivery_df_imu$Delivery_type <- factor(delivery_df_imu$Delivery_type, levels = c("Immunization cost", "Delivery cost"))
     
-    positions <- c(paste("Annual average spending \n on immunization (in", delivery_df_imu$Year[1],")"),"70% \n population", "Population \n at risk", "Health \n professionals")
+    positions <- c(paste("Annual average spending \n on immunization (in", delivery_df_imu$Year[1],")"),"70% \n population", "High risk \n population", "Health \n professionals")
 
     g2 <-  ggplot(delivery_df_imu,
                   aes(Vcc_cost, Delivery_cost))+
@@ -504,7 +666,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
             legend.position = "bottom",
             plot.title = element_text(size=15, face="bold", hjust = 0),
             plot.title.position = "plot")+
-      labs(title = paste("Annual immunization and COVID vaccination cost for", country_name_imu, "(US$) (M: Million, k: Thousand):"))
+      labs(title = paste("Annual immunization and COVID-19-19 vaccination cost for", country_name_imu, "(2020 $US) (M: Million, k: Thousand):"))
 
     g2
 
@@ -528,7 +690,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
              `Delivery cost 70% population`=`DelCst75Pp`) %>%
       gather(Delivery_type, Delivery_cost, -Year) %>% 
       mutate(Vcc_cost= case_when(Delivery_type=="Delivery cost health professional"~ "Health \n professionals",
-                                 Delivery_type=="Delivery cost population at risk" ~"Population \n at risk",
+                                 Delivery_type=="Delivery cost population at risk" ~"High risk \n population",
                                  Delivery_type=="Delivery cost 70% population"~"70% \n population",
                                  Delivery_type=="spendIm"~paste("Annual average spending \n on immunization (in", Year, ")"))) %>% 
       mutate(Delivery_type=recode(Delivery_type, `Delivery cost health professional`="Delivery cost",
@@ -538,7 +700,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
     
     delivery_df_imu$Delivery_type <- factor(delivery_df_imu$Delivery_type, levels = c("Immunization cost", "Delivery cost"))
     
-    positions <- c(paste("Annual average spending \n on immunization (in", delivery_df_imu$Year[1],")"),"70% \n population", "Population \n at risk", "Health \n professionals")
+    positions <- c(paste("Annual average spending \n on immunization (in", delivery_df_imu$Year[1],")"),"70% \n population", "High risk \n population", "Health \n professionals")
     
     g2 <-  ggplot(delivery_df_imu,
                   aes(Vcc_cost, Delivery_cost))+
@@ -557,7 +719,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
             legend.position = "bottom",
             plot.title = element_text(size=15, face="bold", hjust = 0),
             plot.title.position = "plot")+
-      labs(title = paste("Annual immunization and COVID vaccination cost for", country_name_imu, "(US$) (M: Million, k: Thousand):"))
+      labs(title = paste("Annual immunization and COVID-19-19 vaccination cost for", country_name_imu, "(2020 $US) (M: Million, k: Thousand):"))
     
     g2
     
@@ -581,7 +743,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
              `Proc. cost  70% population`=`PrcCst75Pp`) %>%
       gather(Procurement_type, `Procurement_cost`, -Year) %>% 
       mutate(Vcc_cost= case_when(Procurement_type=="Proc. cost health professional"~ "Health \n professionals",
-                                 Procurement_type=="Proc. cost population at risk" ~"Population \n at risk",
+                                 Procurement_type=="Proc. cost population at risk" ~"High risk \n population",
                                  Procurement_type=="Proc. cost  70% population"~"70% \n population",
                                  Procurement_type=="spendIm"~paste("Annual average spending \n on immunization (in", Year, ")"))) %>%  
       mutate(Procurement_type=recode(Procurement_type, `Proc. cost health professional`="Procurement cost",
@@ -591,7 +753,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
     
     procurement_df_imu$Procurement_type <- factor(procurement_df_imu$Procurement_type, levels = c("Immunization cost", "Procurement cost"))
     
-    positions <- c(paste("Annual average spending \n on immunization (in", procurement_df_imu$Year[1],")"),"70% \n population", "Population \n at risk", "Health \n professionals")
+    positions <- c(paste("Annual average spending \n on immunization (in", procurement_df_imu$Year[1],")"),"70% \n population", "High risk \n population", "Health \n professionals")
     
     g2 <-  ggplot(procurement_df_imu,
                   aes(Vcc_cost, Procurement_cost))+
@@ -599,7 +761,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
       geom_text_repel(aes(label=dollar(Procurement_cost)),min.segment.length = Inf, box.padding = 0.5, size=4, fontface="bold")+
       scale_y_log10(labels = addUnits, n.breaks = 7)+
       scale_x_discrete(limits= positions)+
-      scale_color_manual(values = c("Procurement cost"="#FB262A",
+      scale_color_manual(values = c("Procurement cost"="orange",
                                     "Immunization cost"="steelblue"))+
       theme_minimal()+
       theme(axis.title.y=element_blank(),
@@ -610,7 +772,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
             legend.position = "bottom",
             plot.title = element_text(size=15, face="bold", hjust = 0),
             plot.title.position = "plot")+
-      labs(title = paste("Annual immunization and COVID vaccination cost for", country_name_imu, "(US$) (M: Million, k: Thousand):"))
+      labs(title = paste("Annual immunization and COVID-19-19 vaccination cost for", country_name_imu, "(2020 $US) (M: Million, k: Thousand):"))
     
     g2
     
@@ -635,7 +797,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
              `Proc. cost  70% population`=`PrcCst75Pp`) %>%
       gather(Procurement_type, `Procurement_cost`, -Year) %>% 
       mutate(Vcc_cost= case_when(Procurement_type=="Proc. cost health professional"~ "Health \n professionals",
-                                 Procurement_type=="Proc. cost population at risk" ~"Population \n at risk",
+                                 Procurement_type=="Proc. cost population at risk" ~"High risk \n population",
                                  Procurement_type=="Proc. cost  70% population"~"70% \n population",
                                  Procurement_type=="spendIm"~paste("Annual average spending \n on immunization (in", Year, ")"))) %>%  
       mutate(Procurement_type=recode(Procurement_type, `Proc. cost health professional`="Procurement cost",
@@ -645,7 +807,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
     
     procurement_df_imu$Procurement_type <- factor(procurement_df_imu$Procurement_type, levels = c("Immunization cost", "Procurement cost"))
     
-    positions <- c(paste("Annual average spending \n on immunization (in", procurement_df_imu$Year[1],")"),"70% \n population", "Population \n at risk", "Health \n professionals")
+    positions <- c(paste("Annual average spending \n on immunization (in", procurement_df_imu$Year[1],")"),"70% \n population", "High risk \n population", "Health \n professionals")
 
     g2 <-  ggplot(procurement_df_imu,
                   aes(Vcc_cost, Procurement_cost))+
@@ -653,7 +815,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
       geom_text_repel(aes(label=dollar(Procurement_cost)),min.segment.length = Inf, box.padding = 0.5, size=4, fontface="bold")+
       scale_y_log10(labels = addUnits, n.breaks = 7)+
       scale_x_discrete(limits= positions)+
-      scale_color_manual(values = c("Procurement cost"="#FB262A",
+      scale_color_manual(values = c("Procurement cost"="orange",
                                     "Immunization cost"="steelblue"))+
       theme_minimal()+
       theme(axis.title.y=element_blank(),
@@ -664,7 +826,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
             legend.position = "bottom",
             plot.title = element_text(size=15, face="bold", hjust = 0),
             plot.title.position = "plot")+
-      labs(title = paste("Annual immunization and COVID vaccination cost for", country_name_imu, "(US$) (M: Million, k: Thousand):"))
+      labs(title = paste("Annual immunization and COVID-19 vaccination cost for", country_name_imu, "(2020 $US) (M: Million, k: Thousand):"))
     
     g2
     
@@ -688,7 +850,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
              `Proc. cost  70% population`=`PrcCst75Pp`) %>%
       gather(Procurement_type, `Procurement_cost`, -Year) %>% 
       mutate(Vcc_cost= case_when(Procurement_type=="Proc. cost health professional"~ "Health \n professionals",
-                                 Procurement_type=="Proc. cost population at risk" ~"Population \n at risk",
+                                 Procurement_type=="Proc. cost population at risk" ~"High risk \n population",
                                  Procurement_type=="Proc. cost  70% population"~"70% \n population",
                                  Procurement_type=="spendIm"~paste("Annual average spending \n on immunization (in", Year, ")"))) %>%  
       mutate(Procurement_type=recode(Procurement_type, `Proc. cost health professional`="Procurement cost",
@@ -698,7 +860,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
     
     procurement_df_imu$Procurement_type <- factor(procurement_df_imu$Procurement_type, levels = c("Immunization cost", "Procurement cost"))
     
-    positions <- c(paste("Annual average spending \n on immunization (in", procurement_df_imu$Year[1],")"),"70% \n population", "Population \n at risk", "Health \n professionals")
+    positions <- c(paste("Annual average spending \n on immunization (in", procurement_df_imu$Year[1],")"),"70% \n population", "High risk \n population", "Health \n professionals")
     
     g2 <-  ggplot(procurement_df_imu,
                   aes(Vcc_cost, Procurement_cost))+
@@ -706,7 +868,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
       geom_text_repel(aes(label=dollar(Procurement_cost)),min.segment.length = Inf, box.padding = 0.5, size=4, fontface="bold")+
       scale_y_continuous(labels = addUnits, n.breaks = 5)+
       scale_x_discrete(limits= positions)+
-      scale_color_manual(values = c("Procurement cost"="#FB262A",
+      scale_color_manual(values = c("Procurement cost"="orange",
                                     "Immunization cost"="steelblue"))+
       theme_minimal()+
       theme(axis.title.y=element_blank(),
@@ -717,7 +879,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
             legend.position = "bottom",
             plot.title = element_text(size=15, face="bold", hjust = 0),
             plot.title.position = "plot")+
-      labs(title = paste("Annual immunization and COVID vaccination cost for", country_name_imu, "(US$) (M: Million, k: Thousand):"))
+      labs(title = paste("Annual immunization and COVID-19 vaccination cost for", country_name_imu, "(2020 $US) (M: Million, k: Thousand):"))
     
     g2
     
@@ -742,7 +904,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
              `Proc. cost  70% population`=`PrcCst75Pp`) %>%
       gather(Procurement_type, `Procurement_cost`, -Year) %>% 
       mutate(Vcc_cost= case_when(Procurement_type=="Proc. cost health professional"~ "Health \n professionals",
-                                 Procurement_type=="Proc. cost population at risk" ~"Population \n at risk",
+                                 Procurement_type=="Proc. cost population at risk" ~"High risk \n population",
                                  Procurement_type=="Proc. cost  70% population"~"70% \n population",
                                  Procurement_type=="spendIm"~paste("Annual average spending \n on immunization (in", Year, ")"))) %>%  
       mutate(Procurement_type=recode(Procurement_type, `Proc. cost health professional`="Procurement cost",
@@ -752,7 +914,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
     
     procurement_df_imu$Procurement_type <- factor(procurement_df_imu$Procurement_type, levels = c("Immunization cost", "Procurement cost"))
     
-    positions <- c(paste("Annual average spending \n on immunization (in", procurement_df_imu$Year[1],")"),"70% \n population", "Population \n at risk", "Health \n professionals")
+    positions <- c(paste("Annual average spending \n on immunization (in", procurement_df_imu$Year[1],")"),"70% \n population", "High risk \n population", "Health \n professionals")
     
     g2 <-  ggplot(procurement_df_imu,
                   aes(Vcc_cost, Procurement_cost))+
@@ -760,7 +922,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
       geom_text_repel(aes(label=dollar(Procurement_cost)),min.segment.length = Inf, box.padding = 0.5, size=4, fontface="bold")+
       scale_y_continuous(labels = addUnits, n.breaks = 5)+
       scale_x_discrete(limits= positions)+
-      scale_color_manual(values = c("Procurement cost"="#FB262A",
+      scale_color_manual(values = c("Procurement cost"="orange",
                                     "Immunization cost"="steelblue"))+
       theme_minimal()+
       theme(axis.title.y=element_blank(),
@@ -771,7 +933,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
             legend.position = "bottom",
             plot.title = element_text(size=15, face="bold", hjust = 0),
             plot.title.position = "plot")+
-      labs(title = paste("Annual immunization and COVID vaccination cost for", country_name_imu, "(US$) (M: Million, k: Thousand):"))
+      labs(title = paste("Annual immunization and COVID-19 vaccination cost for", country_name_imu, "(2020 $US) (M: Million, k: Thousand):"))
     
     g2
     
@@ -795,7 +957,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
              `Delivery cost 70% population`=`DelCst75Pp`) %>%
       gather(Delivery_type, `Delivery cost`, -Year) %>% 
       mutate(Vcc_cost= case_when(Delivery_type=="Delivery cost health professional"~ "Health \n professionals",
-                                 Delivery_type=="Delivery cost population at risk" ~"Population \n at risk",
+                                 Delivery_type=="Delivery cost population at risk" ~"High risk \n population",
                                  Delivery_type=="Delivery cost 70% population"~"70% \n population")) %>% 
       rename(`type`=`Delivery_type`, `type_cost`=`Delivery cost`) %>% 
       mutate(type=recode(type, `Delivery cost health professional`="Delivery cost",
@@ -820,7 +982,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
              `Proc. cost  70% population`=`PrcCst75Pp`) %>%
       gather(Procurement_type, `Procurement cost`, -Year) %>% 
       mutate(Vcc_cost= case_when(Procurement_type=="Proc. cost health professional"~ "Health \n professionals",
-                                 Procurement_type=="Proc. cost population at risk" ~"Population \n at risk",
+                                 Procurement_type=="Proc. cost population at risk" ~"High risk \n population",
                                  Procurement_type=="Proc. cost  70% population"~"70% \n population")) %>%  
       mutate(Procurement_type=recode(Procurement_type, `Proc. cost health professional`="Procurement cost",
                                      `Proc. cost population at risk`="Procurement cost",
@@ -843,7 +1005,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
              `Total cost 70% population`=`VC75PBC`) %>% 
       gather(Total_type, `Total cost`, -Year) %>%
       mutate(Vcc_cost= case_when(Total_type=="Total cost health professional"~ "Health \n professionals",
-                                 Total_type=="Total cost population at risk" ~"Population \n at risk",
+                                 Total_type=="Total cost population at risk" ~"High risk \n population",
                                  Total_type=="Total cost 70% population"~"70% \n population",
                                  Total_type=="spendIm"~paste("Annual average spending \n on immunization (in", Year,")")))
     
@@ -867,7 +1029,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
     
     plot_stack_imu_final$type <- factor(plot_stack_imu_final$type, levels = c("Immunization cost", "Total cost", "Procurement cost" ,  "Delivery cost"))
     
-    positions <- c(paste("Annual average spending \n on immunization (in", plot_stack_imu$Year[1],")"),"70% \n population", "Population \n at risk", "Health \n professionals")
+    positions <- c(paste("Annual average spending \n on immunization (in", plot_stack_imu$Year[1],")"),"70% \n population", "High risk \n population", "Health \n professionals")
     
     g2 <-  ggplot(plot_stack_imu_final ,
                   aes(Vcc_cost, type_cost))+
@@ -875,8 +1037,8 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
       geom_text_repel(aes(label=mill(type_cost)),min.segment.length = Inf, box.padding = 0.4, size=4, fontface="bold")+
       scale_y_log10(labels = addUnits, n.breaks = 7)+
       scale_color_manual(values = c("Immunization cost"="steelblue",
-                                    "Total cost"="orange",
-                                    "Procurement cost"="#FB262A",
+                                    "Total cost"="#FB262A",
+                                    "Procurement cost"="orange",
                                     "Delivery cost"="#5ab4ac"))+
       scale_x_discrete(limits= positions)+
       theme_minimal()+
@@ -888,7 +1050,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
             legend.position = "bottom",
             plot.title = element_text(size=15, face="bold", hjust = 0),
             plot.title.position = "plot")+
-      labs(title = paste("Annual immunization and COVID vaccination cost for", country_name_imu, "(US$) (M: Million, k: Thousand):"))
+      labs(title = paste("Annual immunization and COVID-19 vaccination cost for", country_name_imu, "(2020 $US) (M: Million, k: Thousand):"))
     
     g2
     
@@ -912,7 +1074,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
              `Delivery cost 70% population`=`DelCst75Pp`) %>%
       gather(Delivery_type, `Delivery cost`, -Year) %>% 
       mutate(Vcc_cost= case_when(Delivery_type=="Delivery cost health professional"~ "Health \n professionals",
-                                 Delivery_type=="Delivery cost population at risk" ~"Population \n at risk",
+                                 Delivery_type=="Delivery cost population at risk" ~"High risk \n population",
                                  Delivery_type=="Delivery cost 70% population"~"70% \n population")) %>% 
       rename(`type`=`Delivery_type`, `type_cost`=`Delivery cost`) %>% 
       mutate(type=recode(type, `Delivery cost health professional`="Delivery cost",
@@ -938,7 +1100,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
              `Proc. cost  70% population`=`PrcCst75Pp`) %>%
       gather(Procurement_type, `Procurement cost`, -Year) %>% 
       mutate(Vcc_cost= case_when(Procurement_type=="Proc. cost health professional"~ "Health \n professionals",
-                                 Procurement_type=="Proc. cost population at risk" ~"Population \n at risk",
+                                 Procurement_type=="Proc. cost population at risk" ~"High risk \n population",
                                  Procurement_type=="Proc. cost  70% population"~"70% \n population")) %>%  
       mutate(Procurement_type=recode(Procurement_type, `Proc. cost health professional`="Procurement cost",
                                      `Proc. cost population at risk`="Procurement cost",
@@ -958,16 +1120,16 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
              PrcCstPpRsk=ifelse(Cvx_lgb=="Yes", (tot_pop*HghRskP*VCstDs_c*num_dos), (tot_pop*HghRskP*VCstDs_b*num_dos)),
              PrcCst75Pp=ifelse(Cvx_lgb=="Yes", ((tot_pop*VCstDs_c*num_dos*pr_hrd_c)+(tot_pop*VCstDs_b*num_dos*pr_hrd_b)),
                                ((tot_pop*VCstDs_b*num_dos*pr_hrd_c)+(tot_pop*VCstDs_b*num_dos*pr_hrd_b))),
-             VCstHPB=(DelCstHthPrf+ PrcCstHthPrf),
-             VCstPRB=(DelCstPpRsk+PrcCstPpRsk),
-             VC75PBC=(DelCst75Pp+PrcCst75Pp)) %>% 
+             VCstHPB=(DelCstHthPrf + PrcCstHthPrf),
+             VCstPRB=(DelCstPpRsk + PrcCstPpRsk),
+             VC75PBC=(DelCst75Pp + PrcCst75Pp)) %>% 
       select(spendIm,Year, VCstHPB, VCstPRB, VC75PBC) %>% 
       rename(`Total cost health professional`= `VCstHPB`,
              `Total cost population at risk`= `VCstPRB`,
              `Total cost 70% population`=`VC75PBC`) %>% 
       gather(Total_type, `Total cost`, -Year) %>%
       mutate(Vcc_cost= case_when(Total_type=="Total cost health professional"~ "Health \n professionals",
-                                 Total_type=="Total cost population at risk" ~"Population \n at risk",
+                                 Total_type=="Total cost population at risk" ~"High risk \n population",
                                  Total_type=="Total cost 70% population"~"70% \n population",
                                  Total_type=="spendIm"~paste("Annual average spending \n on immunization (in", Year,")")))
 
@@ -991,7 +1153,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
     
     plot_stack_imu_final$type <- factor(plot_stack_imu_final$type, levels = c("Immunization cost", "Total cost", "Procurement cost" ,  "Delivery cost"))
     
-    positions <- c(paste("Annual average spending \n on immunization (in", plot_stack_imu$Year[1],")"),"70% \n population", "Population \n at risk", "Health \n professionals")
+    positions <- c(paste("Annual average spending \n on immunization (in", plot_stack_imu$Year[1],")"),"70% \n population", "High risk \n population", "Health \n professionals")
     
     g2 <-  ggplot(plot_stack_imu_final ,
                   aes(Vcc_cost, type_cost))+
@@ -999,8 +1161,8 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
       geom_text_repel(aes(label=mill(type_cost)),min.segment.length = Inf, box.padding = 0.4, size=4, fontface="bold")+
       scale_y_log10(labels = addUnits, n.breaks = 7)+
       scale_color_manual(values = c("Immunization cost"="steelblue",
-                                    "Total cost"="orange",
-                                    "Procurement cost"="#FB262A",
+                                    "Total cost"="#FB262A",
+                                    "Procurement cost"="orange",
                                     "Delivery cost"="#5ab4ac"))+
       scale_x_discrete(limits= positions)+
       theme_minimal()+
@@ -1012,7 +1174,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
             legend.position = "bottom",
             plot.title = element_text(size=15, face="bold", hjust = 0),
             plot.title.position = "plot")+
-      labs(title = paste("Annual immunization and COVID vaccination cost for", country_name_imu, "(US$) (M: Million, k: Thousand):"))
+      labs(title = paste("Annual immunization and COVID-19 vaccination cost for", country_name_imu, "(2020 $US) (M: Million, k: Thousand):"))
     
     g2
     
@@ -1035,7 +1197,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
              `Delivery cost 70% population`=`DelCst75Pp`) %>%
       gather(Delivery_type, `Delivery cost`, -Year) %>% 
       mutate(Vcc_cost= case_when(Delivery_type=="Delivery cost health professional"~ "Health \n professionals",
-                                 Delivery_type=="Delivery cost population at risk" ~"Population \n at risk",
+                                 Delivery_type=="Delivery cost population at risk" ~"High risk \n population",
                                  Delivery_type=="Delivery cost 70% population"~"70% \n population")) %>% 
       rename(`type`=`Delivery_type`, `type_cost`=`Delivery cost`) %>% 
       mutate(type=recode(type, `Delivery cost health professional`="Delivery cost",
@@ -1060,7 +1222,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
              `Proc. cost  70% population`=`PrcCst75Pp`) %>%
       gather(Procurement_type, `Procurement cost`, -Year) %>% 
       mutate(Vcc_cost= case_when(Procurement_type=="Proc. cost health professional"~ "Health \n professionals",
-                                 Procurement_type=="Proc. cost population at risk" ~"Population \n at risk",
+                                 Procurement_type=="Proc. cost population at risk" ~"High risk \n population",
                                  Procurement_type=="Proc. cost  70% population"~"70% \n population")) %>%  
       mutate(Procurement_type=recode(Procurement_type, `Proc. cost health professional`="Procurement cost",
                                      `Proc. cost population at risk`="Procurement cost",
@@ -1082,7 +1244,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
              `Total cost 70% population`=`VC75PBC`) %>% 
       gather(Total_type, `Total cost`, -Year) %>%
       mutate(Vcc_cost= case_when(Total_type=="Total cost health professional"~ "Health \n professionals",
-                                 Total_type=="Total cost population at risk" ~"Population \n at risk",
+                                 Total_type=="Total cost population at risk" ~"High risk \n population",
                                  Total_type=="Total cost 70% population"~"70% \n population",
                                  Total_type=="spendIm"~paste("Annual average spending \n on immunization (in", Year,")")))
     
@@ -1106,7 +1268,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
     
     plot_stack_imu_final$type <- factor(plot_stack_imu_final$type, levels = c("Immunization cost", "Total cost", "Procurement cost" ,  "Delivery cost"))
     
-    positions <- c(paste("Annual average spending \n on immunization (in", plot_stack_imu$Year[1],")"),"70% \n population", "Population \n at risk", "Health \n professionals")
+    positions <- c(paste("Annual average spending \n on immunization (in", plot_stack_imu$Year[1],")"),"70% \n population", "High risk \n population", "Health \n professionals")
     
     g2 <-  ggplot(plot_stack_imu_final ,
                   aes(Vcc_cost, type_cost))+
@@ -1114,8 +1276,8 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
       geom_text_repel(aes(label=mill(type_cost)),min.segment.length = Inf, box.padding = 0.4, size=4, fontface="bold")+
       scale_y_continuous(labels = addUnits, n.breaks = 5)+
       scale_color_manual(values = c("Immunization cost"="steelblue",
-                                    "Total cost"="orange",
-                                    "Procurement cost"="#FB262A",
+                                    "Total cost"="#FB262A",
+                                    "Procurement cost"="orange",
                                     "Delivery cost"="#5ab4ac"))+
       scale_x_discrete(limits= positions)+
       theme_minimal()+
@@ -1127,7 +1289,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
             legend.position = "bottom",
             plot.title = element_text(size=15, face="bold", hjust = 0),
             plot.title.position = "plot")+
-      labs(title = paste("Annual immunization and COVID vaccination cost for", country_name_imu, "(US$) (M: Million, k: Thousand):"))
+      labs(title = paste("Annual immunization and COVID-19 vaccination cost for", country_name_imu, "(2020 $US) (M: Million, k: Thousand):"))
     
     g2
     
@@ -1151,7 +1313,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
              `Delivery cost 70% population`=`DelCst75Pp`) %>%
       gather(Delivery_type, `Delivery cost`, -Year) %>% 
       mutate(Vcc_cost= case_when(Delivery_type=="Delivery cost health professional"~ "Health \n professionals",
-                                 Delivery_type=="Delivery cost population at risk" ~"Population \n at risk",
+                                 Delivery_type=="Delivery cost population at risk" ~"High risk \n population",
                                  Delivery_type=="Delivery cost 70% population"~"70% \n population")) %>% 
       rename(`type`=`Delivery_type`, `type_cost`=`Delivery cost`) %>% 
       mutate(type=recode(type, `Delivery cost health professional`="Delivery cost",
@@ -1177,7 +1339,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
              `Proc. cost  70% population`=`PrcCst75Pp`) %>%
       gather(Procurement_type, `Procurement cost`, -Year) %>% 
       mutate(Vcc_cost= case_when(Procurement_type=="Proc. cost health professional"~ "Health \n professionals",
-                                 Procurement_type=="Proc. cost population at risk" ~"Population \n at risk",
+                                 Procurement_type=="Proc. cost population at risk" ~"High risk \n population",
                                  Procurement_type=="Proc. cost  70% population"~"70% \n population")) %>%  
       mutate(Procurement_type=recode(Procurement_type, `Proc. cost health professional`="Procurement cost",
                                      `Proc. cost population at risk`="Procurement cost",
@@ -1206,7 +1368,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
              `Total cost 70% population`=`VC75PBC`) %>% 
       gather(Total_type, `Total cost`, -Year) %>%
       mutate(Vcc_cost= case_when(Total_type=="Total cost health professional"~ "Health \n professionals",
-                                 Total_type=="Total cost population at risk" ~"Population \n at risk",
+                                 Total_type=="Total cost population at risk" ~"High risk \n population",
                                  Total_type=="Total cost 70% population"~"70% \n population",
                                  Total_type=="spendIm"~paste("Annual average spending \n on immunization (in", Year,")")))
     
@@ -1231,7 +1393,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
     
     plot_stack_imu_final$type <- factor(plot_stack_imu_final$type, levels = c("Immunization cost", "Total cost", "Procurement cost" ,  "Delivery cost"))
     
-    positions <- c(paste("Annual average spending \n on immunization (in", plot_stack_imu$Year[1],")"),"70% \n population", "Population \n at risk", "Health \n professionals")
+    positions <- c(paste("Annual average spending \n on immunization (in", plot_stack_imu$Year[1],")"),"70% \n population", "High risk \n population", "Health \n professionals")
     
     g2 <-  ggplot(plot_stack_imu_final ,
                   aes(Vcc_cost, type_cost))+
@@ -1239,8 +1401,8 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
       geom_text_repel(aes(label=mill(type_cost)),min.segment.length = Inf, box.padding = 0.4, size=4, fontface="bold")+
       scale_y_continuous(labels = addUnits, n.breaks = 5)+
       scale_color_manual(values = c("Immunization cost"="steelblue",
-                                    "Total cost"="orange",
-                                    "Procurement cost"="#FB262A",
+                                    "Total cost"="#FB262A",
+                                    "Procurement cost"="orange",
                                     "Delivery cost"="#5ab4ac"))+
       scale_x_discrete(limits= positions)+
       theme_minimal()+
@@ -1252,7 +1414,7 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
             legend.position = "bottom",
             plot.title = element_text(size=15, face="bold", hjust = 0),
             plot.title.position = "plot")+
-      labs(title = paste("Annual immunization and COVID vaccination cost for", country_name_imu, "(US$) (M: Million, k: Thousand):"))
+      labs(title = paste("Annual immunization and COVID-19 vaccination cost for", country_name_imu, "(2020 $US) (M: Million, k: Thousand):"))
     
     g2
   }
@@ -1260,9 +1422,9 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
 
 ui <- bootstrapPage(
   useShinyjs(),
-  navbarPage(title = "COVID Vaccination Cost Tracker", inverse = TRUE, 
+  navbarPage(title = "COVID-19 Vaccination Cost Tracker", inverse = TRUE, 
              
-             tabPanel("COVID Vaccination Cost Map", 
+             tabPanel("COVID-19 Vaccination Cost Map", 
                       
                       div(class = "outer",
                           tags$head(
@@ -1293,7 +1455,8 @@ ui <- bootstrapPage(
                                             of country on the map."))),
                                         
                                         tags$h6(tags$i(tags$b("Note: If you want to make changes to the input variables used in the calculations to see how different costs change, please go to 
-                                                      `Scenario Analysis and Immunization comparison` tab in this app."))),
+                                                      `Scenario Analysis and Immunization Comparison` tab in this app. You can also visualize and make changes to 
+                                                              Delivery and Procurement costs of vaccine for the country of your choice."))),
                                         
                                         tags$h6(tags$i(tags$b("Choose any of the radio buttons below to see the distrbution of respective costs on the map."))),
                                         
@@ -1303,9 +1466,8 @@ ui <- bootstrapPage(
                                                      choiceNames =  list(tags$span(style = "font-size: 12px; color:#262626", "Vaccinate 70% population"),
                                                                          tags$span(style = "font-size: 12px; color:#262626", "Vaccinate high risk population"), 
                                                                          tags$span(style = "font-size: 12px; color:#262626", "Vaccinate health professionals")),
-                                                     choiceValues = c("Vaccinate 70% population", "Vaccinate high risk population", "Vaccinate health professionals")
-                                                     
-                                        ),
+                                                     choiceValues = c("Vaccinate 70% population", "Vaccinate high risk population", "Vaccinate health professionals"),
+                                                     selected = "Vaccinate health professionals"),
                                         
                                         checkboxInput("cvx_check", h5(tags$span(style="font-size: 12px","Include COVAX procurement pricing"),
                                                                       tags$style(type="text/css", "#q01_1 {vertical-align: top;}"),
@@ -1327,12 +1489,12 @@ ui <- bootstrapPage(
                                         
                                         selectInput("country", "",choices = NULL, width = "150px"),
                                         
-                                        div(style = "margin-top:-30px"),
+                                        div(style = "margin-top:-17px"),
                                         
-                                        radioGroupButtons("scales", label = "", choices = c("Linear", "Log"),  selected = "Log", size = "xs",
-                                                          status = "primary"),
+                                        # radioGroupButtons("scales", label = "", choices = c("Linear", "Log"),  selected = "Log", size = "xs",
+                                        #                   status = "primary"),
                                         
-                                        div(style = "margin-top:-15px"),
+                                        #div(style = "margin-top:-15px"),
                                         
                                         plotOutput("cost_plot", height = "200px", width = "100%")%>% withSpinner(),
                                         
@@ -1348,14 +1510,14 @@ ui <- bootstrapPage(
                           absolutePanel(id = "logo", class = "card", bottom = 10, left = 340, width = 80, fixed=TRUE, draggable = FALSE, height = "auto",
                                         actionButton("twitter_share", label = "", icon = icon("twitter"),style='padding:10px',
                                                      onclick = sprintf("window.open('%s')", 
-                                                                       "https://twitter.com/intent/tweet?text=%20Check out Duke University%20country vaccination%20cost%20mapper&url= https://exploring.shinyapps.io/covid_price_4/%20%20%20&hashtags=coronavirus")))
+                                                                       "https://twitter.com/intent/tweet?text=%20Check out Duke University%20country vaccination%20cost%20mapper&url= https://exploring.shinyapps.io/COVID-19_price_4/%20%20%20&hashtags=coronavirus")))
                           
                       )
              ),
              
              
              
-             tabPanel("Scenario Analysis and Immunization comparison",
+             tabPanel("Scenario Analysis and Immunization Comparison",
                       
                       sidebarLayout(
                         
@@ -1364,7 +1526,7 @@ ui <- bootstrapPage(
                           ),
                           
                           tags$h6(tags$i(tags$b("The chart on the right shows the comparison between average annual immunization
-                              cost, and different COVID vaccination costs for the selected country in this panel."))),
+                              cost, and different COVID-19 vaccination costs for the selected country in this panel."))),
                           
                           tags$h6(tags$i(tags$b("Note: You can also input your data for the variables on number of health professionals, population at risk, 
                                                 number of doses, bilateral vaccine price, and vaccine delivery cost by clicking on `Click to input data!` button below and populating your data.
@@ -1431,7 +1593,7 @@ ui <- bootstrapPage(
                                 tags$h6(
                                   tags$i("The cost calculations to vaccinate 70% population, health professionals
                                           and population at risk use the following variables. You can change these variables
-                                          to update the COVID vacccination cost for the `Country` selected above. Please
+                                          to update the COVID-19 vacccination cost for the `Country` selected above. Please
                                           read `?` icon shown against each variable below to understand which indicator impacts
                                           what cost calculation.")),
                                 
@@ -1482,7 +1644,7 @@ ui <- bootstrapPage(
                                           options = list(container = "body")
                                 ),
                                 
-                                numericInput("imu_Vac_bilateral",label = h5("Bilateral procurement cost per dose:",
+                                numericInput("imu_Vac_bilateral",label = h5("Bilateral procurement cost per dose (2020 $US):",
                                                                             tags$style(type="text/css", "#q12_2 {vertical-align: top;}"),
                                                                             bsButton("q12_2", label="", icon=icon("question"), style="info", size="extra-small")),
                                              min = 0, value = 0, step = .01),
@@ -1496,7 +1658,7 @@ ui <- bootstrapPage(
                                           options = list(container = "body")
                                 ),
                                 
-                                numericInput("imu_delivery_vaccine", label = h5("Delivery cost per dose (US$):",
+                                numericInput("imu_delivery_vaccine", label = h5("Delivery cost per dose (2020 $US):",
                                                                                 tags$style(type="text/css", "#q13 {vertical-align: top;}"),
                                                                                 bsButton("q13", label="", icon=icon("question"), style="info", size="extra-small")),
                                              min = 0, value = 0, step = 0.01),
@@ -1536,12 +1698,12 @@ ui <- bootstrapPage(
                         DTOutput("data_explorer"))
              ),
               
-             tabPanel("About this site",
+             tabPanel("About This Site",
                       tags$div(
                         tags$br(),tags$h4("Background"),
                         "Need to add information here",
                         tags$br(),tags$br(),tags$h4("Code"),
-                        "Code and input data used to generate this Shiny tool are available on", a(href="https://github.com/pyarasid/COVID-vaccination-Costs-Analysis", "Github."),
+                        "Code and input data used to generate this Shiny tool are available on", a(href="https://github.com/pyarasid/COVID-19-vaccination-Costs-Analysis", "Github."),
                         tags$br(),tags$br(),tags$h4("Selected references"),
                         "Need to add sources and links here",
                         tags$br(),tags$br(),tags$h4("Contributors"),
@@ -1575,7 +1737,7 @@ server <- function(input, output, session) {
   
   #plot function
   output$cost_plot <- renderPlot({
-    cost_plot(input$country,  input$cvx_check, input$scales)
+    cost_plot(input$country,  input$cvx_check)
   })
   
   filtered_world_polygon <- reactive({
@@ -1699,7 +1861,7 @@ server <- function(input, output, session) {
       st_drop_geometry(filtered_world_polygon()) %>% 
         dplyr::select(nam_lng,Cvx_lgb, num_dos,VCstDs_b,
                       DlCstDs, VC75PBC) %>% 
-        dplyr::mutate(VCstDs_b= dollar_format(accuracy = .1)(VCstDs_b),
+        dplyr::mutate(VCstDs_b= dollar_format(accuracy = .01)(VCstDs_b),
                       DlCstDs=dollar_format(accuracy = .01)(DlCstDs),
                       VC75PBC= dollar_format()(VC75PBC)) %>% 
         dplyr::rename(Country= nam_lng,
@@ -1716,7 +1878,7 @@ server <- function(input, output, session) {
                       DlCstDs, VC75PBC) %>% 
         dplyr::mutate(cvx_price70p=ifelse(Cvx_lgb=="Yes", VCstDs_c, "Not eligible")) %>% 
         dplyr::mutate(VCstDs_c= dollar_format()(VCstDs_c),
-                      VCstDs_b= dollar_format(accuracy = .1)(VCstDs_b),
+                      VCstDs_b= dollar_format(accuracy = .01)(VCstDs_b),
                       DlCstDs=dollar_format(accuracy = .01)(DlCstDs),
                       VC75PBC= dollar_format()(VC75PBC)) %>% 
         dplyr::rename(Country= nam_lng,
@@ -1739,7 +1901,7 @@ server <- function(input, output, session) {
       st_drop_geometry(filtered_world_polygon()) %>% 
         dplyr::select(nam_lng,Cvx_lgb, num_dos,  VCstDs_b,
                       DlCstDs, VCstPRB) %>% 
-        dplyr::mutate(VCstDs_b= dollar_format(accuracy = .1)(VCstDs_b),
+        dplyr::mutate(VCstDs_b= dollar_format(accuracy = .01)(VCstDs_b),
                       DlCstDs=dollar_format(accuracy = .01)(DlCstDs),
                       VCstPRB= dollar_format()(VCstPRB)) %>% 
         dplyr::rename(Country= nam_lng,
@@ -1756,7 +1918,7 @@ server <- function(input, output, session) {
                       DlCstDs, VCstPRB) %>% 
         dplyr::mutate(cvx_pricersk=ifelse(Cvx_lgb=="Yes", VCstDs_c, "Not eligible")) %>% 
         dplyr::mutate(VCstDs_c= dollar_format()(VCstDs_c),
-                      VCstDs_b= dollar_format(accuracy = .1)(VCstDs_b),
+                      VCstDs_b= dollar_format(accuracy = .01)(VCstDs_b),
                       DlCstDs=dollar_format(accuracy = .01)(DlCstDs),
                       VCstPRB= dollar_format()(VCstPRB)) %>% 
         dplyr::rename(Country= nam_lng,
@@ -1777,7 +1939,7 @@ server <- function(input, output, session) {
       st_drop_geometry(filtered_world_polygon()) %>% 
         dplyr::select(nam_lng,Cvx_lgb, num_dos, VCstDs_b,
                       DlCstDs, VCstHPB) %>% 
-        dplyr::mutate(VCstDs_b= dollar_format(accuracy = .1)(VCstDs_b),
+        dplyr::mutate(VCstDs_b= dollar_format(accuracy = .01)(VCstDs_b),
                       DlCstDs=dollar_format(accuracy = .01)(DlCstDs),
                       VCstHPB= dollar_format()(VCstHPB)) %>% 
         dplyr::rename(Country= nam_lng,
@@ -1794,7 +1956,7 @@ server <- function(input, output, session) {
                       DlCstDs, VCstHPB) %>% 
         dplyr::mutate(cvx_pricehlth=ifelse(Cvx_lgb=="Yes", VCstDs_c, "Not eligible")) %>% 
         dplyr::mutate(VCstDs_c= dollar_format()(VCstDs_c),
-                      VCstDs_b= dollar_format(accuracy = .1)(VCstDs_b),
+                      VCstDs_b= dollar_format(accuracy = .01)(VCstDs_b),
                       DlCstDs=dollar_format(accuracy = .01)(DlCstDs),
                       VCstHPB= dollar_format()(VCstHPB)) %>% 
         dplyr::rename(Country= nam_lng,
@@ -1820,7 +1982,7 @@ server <- function(input, output, session) {
                       layerId = ~nam_lng) %>%
           clearControls() %>%
           addLegend("bottomleft", pal = factpal(), values =~na.omit(cst_rng_75), opacity = 1,
-                    title = "Cost to vaccinate<br>70% population (US$)")
+                    title = "Cost to vaccinate<br>70% population (2020 $US)")
       })
     }
     
@@ -1835,7 +1997,7 @@ server <- function(input, output, session) {
                       layerId = ~nam_lng) %>%
           clearControls() %>%
           addLegend("bottomleft", pal = factpal(), values =~na.omit(cst_rng_75), opacity = 1,
-                    title = "Cost to vaccinate<br>70% population (US$)")
+                    title = "Cost to vaccinate<br>70% population (2020 $US)")
       })
       
     }
@@ -1852,7 +2014,7 @@ server <- function(input, output, session) {
                       layerId = ~nam_lng) %>% 
           clearControls() %>% 
           addLegend("bottomleft", pal =  factpal_pop(), values =~na.omit(cst_rng_rsk), opacity = 1,
-                    title = "Cost to vaccinate high<br> risk population (US$)")
+                    title = "Cost to vaccinate high<br> risk population (2020 $US)")
       })
     }
     
@@ -1868,7 +2030,7 @@ server <- function(input, output, session) {
                       layerId = ~nam_lng) %>% 
           clearControls() %>% 
           addLegend("bottomleft", pal =  factpal_pop(), values =~na.omit(cst_rng_rsk), opacity = 1,
-                    title = "Cost to vaccinate high<br> risk population (US$)")
+                    title = "Cost to vaccinate high<br> risk population (2020 $US)")
       })
     }
     
@@ -1884,7 +2046,7 @@ server <- function(input, output, session) {
                       layerId = ~nam_lng) %>% 
           clearControls() %>% 
           addLegend("bottomleft", pal = factpal_health(), values =~na.omit(cst_rng_hlth), opacity = 1,
-                    title = "Cost to vaccinate<br>health professionals (US$)")
+                    title = "Cost to vaccinate<br>health professionals (2020 $US)")
         
       })
     }
@@ -1900,7 +2062,7 @@ server <- function(input, output, session) {
                       layerId = ~nam_lng) %>% 
           clearControls() %>% 
           addLegend("bottomleft", pal = factpal_health(), values =~na.omit(cst_rng_hlth), opacity = 1,
-                    title = "Cost to vaccinate<br>health professionals (US$)")
+                    title = "Cost to vaccinate<br>health professionals (2020 $US)")
         
       })
       
