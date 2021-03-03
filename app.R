@@ -1451,7 +1451,7 @@ ui <- bootstrapPage(
                                         width = 330, style='background-color: #eaf2f8',
                                         
                                         
-                                        tags$h6(tags$i(tags$b("You can click any country on the map to view more information. The chart below will also update based on your choice
+                                        tags$h6(tags$i(tags$b("You can click any country on the map to view the total cost to vaccinate and other information based on the currently selected radio button below. The chart below will also update based on your choice
                                             of country on the map."))),
                                         
                                         tags$h6(tags$i(tags$b("Note: If you want to make changes to the input variables used in the calculations to see how different costs change, please go to 
@@ -1462,7 +1462,7 @@ ui <- bootstrapPage(
                                         
                                         div(style = "margin-top:-5px"),
                                         
-                                        radioButtons("maptype", list(tags$span(style = "font-weight: bold;font-size: 12px; color:#262626", "Cost to:")),
+                                        radioButtons("maptype", list(tags$span(style = "font-weight: bold;font-size: 12px; color:#262626", "Total cost to:")),
                                                      choiceNames =  list(tags$span(style = "font-size: 12px; color:#262626", "Vaccinate 70% population"),
                                                                          tags$span(style = "font-size: 12px; color:#262626", "Vaccinate high risk population"), 
                                                                          tags$span(style = "font-size: 12px; color:#262626", "Vaccinate health professionals")),
@@ -1475,10 +1475,10 @@ ui <- bootstrapPage(
                                                       value = FALSE),
                                         bsPopover(id="q01_1", title="",
                                                   content=paste("Check this box if you think that country/ies that you want to explore",
-                                                                "will have access to COVAX prices. Checking this box will change the calculation",
-                                                                "of total costs for 70% population, health professionals, and at-risk population",
+                                                                "will have access to COVAX prices. Checking this box will update the calculation",
+                                                                "of costs to vaccinate 70% population, health professionals, and high-risk population",
                                                                 "to include the COVAX prices. If this box is left unchecked then only the bilateral",
-                                                                "prices will be used in calculating total prices.",
+                                                                "prices will be used in calculating vaccination cost.",
                                                                 "Check out the Data Explorer page for the baseline COVAX and bilateral prices used in the calculations."),
                                                   placement = "bottom",
                                                   trigger = "focus",
@@ -1527,7 +1527,7 @@ ui <- bootstrapPage(
                               cost, and different COVID-19 vaccination costs for the selected country in this panel."))),
                           
                           tags$h6(tags$i(tags$b("Note: You can also input your data for the variables on number of health professionals, population at risk, 
-                                                number of doses, bilateral vaccine price, and vaccine delivery cost by clicking on `Click to input data!` button below and populating your data.
+                                                number of doses, bilateral vaccine price, and vaccine delivery cost by clicking on `Click to input data!` button below.
                                                 The costs in the chart will automatically update based on your input data. The average annual immunization cost remains fixed as the country has already incurred this cost."))),
                           
                           
@@ -1553,11 +1553,11 @@ ui <- bootstrapPage(
                                         value = FALSE),
                           bsPopover(id="q07_1", title="",
                                     content=paste("Check this box if you think that country/ies that you want to explore",
-                                                  "will have access to COVAX prices. Checking this box will change the calculation",
-                                                  "of total costs for 70% population, health professionals, and at risk population",
+                                                  "will have access to COVAX prices. Checking this box will update the calculation",
+                                                  "of costs to vaccinate 70% population, health professionals, and high-risk population",
                                                   "to include the COVAX prices. If this box is left unchecked then only the bilateral",
-                                                  "prices will be used in calculating total prices.",
-                                                  "Check out the Data Explorer page for the baseline COVAX and bilateral prices used in the calculations."),
+                                                  "prices will be used in calculating vaccination cost.",
+                                                  "Check out the Data Explorer page or the table below the chart for the baseline COVAX and bilateral prices for used in the calculations."),
                                     placement = "bottom",
                                     trigger = "focus",
                                     options = list(container = "body")
@@ -1590,9 +1590,9 @@ ui <- bootstrapPage(
                                 
                                 tags$h6(
                                   tags$i("The cost calculations to vaccinate 70% population, health professionals
-                                          and population at risk use the following variables. You can change these variables
+                                          and high risk population use the following variables. You can change the baseline data for these variables
                                           to update the COVID-19 vacccination cost for the `Country` selected above. Please
-                                          read `?` icon shown against each variable below to understand which indicator impacts
+                                          read `?` icon shown against each variable to understand which indicator impacts
                                           what cost calculation.")),
                                 
                                 div(style = "margin-top:-5px"),
