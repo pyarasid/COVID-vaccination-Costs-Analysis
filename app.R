@@ -1505,7 +1505,7 @@ ui <- bootstrapPage(
                           ),
                           
                           absolutePanel(id = "logo", class = "card", bottom = 10, left = 280, width = 80, fixed=TRUE, draggable = FALSE, height = "auto",
-                                        tags$a(href='https://centerforpolicyimpact.org/', tags$img(src='CPIGH_Logo.png',height='40',width='80'))),
+                                        tags$a(href='https://centerforpolicyimpact.org/', target="_blank",  tags$img(src='CPIGH_Logo.png',height='40',width='80'))),
                           
                           absolutePanel(id = "logo", class = "card", bottom = 10, left = 370, width = 80, fixed=TRUE, draggable = FALSE, height = "auto",
                                         actionButton("twitter_share", label = "", icon = icon("twitter"),style='padding:10px',
@@ -1701,20 +1701,20 @@ ui <- bootstrapPage(
                         tags$br(),tags$h4("Background"),
                         "Need to add information here",
                         tags$br(),tags$br(),tags$h4("Code"),
-                        "Code and input data used to generate this Shiny tool are available on", a(href="https://github.com/pyarasid/COVID-19-vaccination-Costs-Analysis", "Github."),
+                        "Code and input data used to generate this Shiny tool are available on", a(href="https://github.com/pyarasid/COVID-vaccination-Costs-Analysis", target="_blank" ,  "Github."),
                         tags$br(),tags$br(),tags$h4("Selected references"),
                         "Need to add sources and links here",
                         tags$br(),tags$br(),tags$h4("Contributors"),
-                        a(href="https://globalhealth.duke.edu/people/dixit-siddharth","Siddharth Dixit,"), "Associate in Research, The Center for Policy Impact in Global Health, Duke University",tags$br(),
-                        a(href="https://globalhealth.duke.edu/people/diab-mohamed-mustafa", "Mohamed Mustafa Diab,"), "Policy Associate, The Center for Policy Impact in Global Health, Duke University",tags$br(),
+                        a(href="https://globalhealth.duke.edu/people/dixit-siddharth", target="_blank" ,"Siddharth Dixit,"), "Associate in Research, The Center for Policy Impact in Global Health, Duke University",tags$br(),
+                        a(href="https://globalhealth.duke.edu/people/diab-mohamed-mustafa", target="_blank",  "Mohamed Mustafa Diab,"), "Policy Associate, The Center for Policy Impact in Global Health, Duke University",tags$br(),
                         "Armand Zimmerman, Research Assistant, The Center for Policy Impact in Global Health, Duke University",tags$br(),
-                        a(href="https://globalhealth.duke.edu/people/ogbuoji-osondu", "Osondu Ogbuoji,"),  "Assistant Research Professor, The Center for Policy Impact in Global Health, Duke University",tags$br(),
-                        a(href= "https://globalhealth.duke.edu/people/yamey-gavin", "Gavin Yamey,"), "Director, The Center for Policy Impact in Global Health, Duke University",tags$br(),
+                        a(href="https://globalhealth.duke.edu/people/ogbuoji-osondu", target="_blank", "Osondu Ogbuoji,"),  "Assistant Research Professor, The Center for Policy Impact in Global Health, Duke University",tags$br(),
+                        a(href= "https://globalhealth.duke.edu/people/yamey-gavin", target="_blank", "Gavin Yamey,"), "Director, The Center for Policy Impact in Global Health, Duke University",tags$br(),
                         tags$br(),tags$h4("Contact"),
                         "cpigh@duke.edu",tags$br(),tags$br(),
-                        tags$a(href='https://centerforpolicyimpact.org/',tags$img(src = "CPIGH_Logo.png", width = "350px")),tags$br(), tags$br(),
+                        tags$a(href='https://centerforpolicyimpact.org/', target="_blank" , tags$img(src = "CPIGH_Logo.png", width = "350px")),tags$br(), tags$br(),
                         
-                        tags$a(href='https://globalhealth.duke.edu/',tags$img(src = "dghi_logo.jpg", width = "250px"))
+                        tags$a(href='https://globalhealth.duke.edu/', target="_blank",tags$img(src = "dghi_logo.jpg", width = "250px"))
                       )
              )
   )
