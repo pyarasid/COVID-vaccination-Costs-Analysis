@@ -1515,8 +1515,6 @@ ui <- bootstrapPage(
                       )
              ),
              
-             
-             
              tabPanel("Scenario Analysis and Immunization Comparison",
                       
                       sidebarLayout(
