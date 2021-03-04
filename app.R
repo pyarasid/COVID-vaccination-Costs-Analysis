@@ -1456,7 +1456,7 @@ ui <- bootstrapPage(
                                         
                                         tags$h6(tags$i(tags$b("Note: If you want to make changes to the input variables used in the calculations to see how different costs change, please go to 
                                                       `Scenario Analysis and Immunization Comparison` tab. You can also visualize and make changes to 
-                                                              Delivery and Procurement costs of vaccine for the country of your choice."))),
+                                                              Delivery and Procurement costs of vaccine for the country of your choice on this tab."))),
                                         
                                         tags$h6(tags$i(tags$b("Choose any of the radio buttons below to see the distrbution of respective costs on the map."))),
                                         
@@ -1504,9 +1504,9 @@ ui <- bootstrapPage(
                           ),
                           
                           absolutePanel(id = "logo", class = "card", bottom = 10, left = 280, width = 80, fixed=TRUE, draggable = FALSE, height = "auto",
-                                        tags$a(href='https://centerforpolicyimpact.org/', target="_blank",  tags$img(src='CPIGH_Logo.png',height='40',width='80'))),
+                                        tags$a(href='https://centerforpolicyimpact.org/', target="_blank",  tags$img(src='CPIGH_Logo.png',height='40',width='120'))),
                           
-                          absolutePanel(id = "logo", class = "card", bottom = 10, left = 370, width = 80, fixed=TRUE, draggable = FALSE, height = "auto",
+                          absolutePanel(id = "logo", class = "card", bottom = 10, left = 410, width = 80, fixed=TRUE, draggable = FALSE, height = "auto",
                                         actionButton("twitter_share", label = "", icon = icon("twitter"),style='padding:10px',
                                                      onclick = sprintf("window.open('%s')", 
                                                                        "https://twitter.com/intent/tweet?text=%20Check out the interactive COVID-19 country vaccination cost tracker developed by The Center for Policy Impact in Global Health, based at Duke University, USA:&url= https://centerforpolicyimpact.shinyapps.io/covid-vaccination-costs-analysis/%20%20%20&hashtags=coronavirus @DukeCPIGH @DukeGHI @GYamey @sid_dix @DukeU")))
@@ -1717,10 +1717,9 @@ ui <- bootstrapPage(
                         a(href="https://globalhealth.duke.edu/people/diab-mohamed-mustafa", target="_blank",  "Mohamed Mustafa Diab,"), "Policy Associate, The Center for Policy Impact in Global Health, Duke University",tags$br(),
                         "Armand Zimmerman, Research Assistant, The Center for Policy Impact in Global Health, Duke University",tags$br(),
                         a(href="https://globalhealth.duke.edu/people/ogbuoji-osondu", target="_blank", "Osondu Ogbuoji,"),  "Assistant Research Professor, The Center for Policy Impact in Global Health, Duke University",tags$br(),
-                        a(href= "https://globalhealth.duke.edu/people/yamey-gavin", target="_blank", "Gavin Yamey,"), "Director, The Center for Policy Impact in Global Health, Duke University",tags$br(),
-                        "cpigh@duke.edu",tags$br(),tags$br(),
-                        tags$a(href='https://centerforpolicyimpact.org/', target="_blank" , tags$img(src = "CPIGH_Logo.png", width = "350px")),
-                        
+                        a(href= "https://globalhealth.duke.edu/people/yamey-gavin", target="_blank", "Gavin Yamey,"), "Director, The Center for Policy Impact in Global Health, Duke University",tags$br(),tags$br(),
+                        tags$h4(tags$b("Contact")),"cpigh@duke.edu",tags$br(),tags$br(),
+                        tags$a(href='https://centerforpolicyimpact.org/', target="_blank" , tags$img(src = "CPIGH_Logo.png", width = "400px")),
                         tags$a(href='https://globalhealth.duke.edu/', target="_blank",tags$img(src = "dghi_logo.jpg", width = "250px"))
                       )
              )
