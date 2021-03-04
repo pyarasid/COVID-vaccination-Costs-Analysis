@@ -1451,11 +1451,11 @@ ui <- bootstrapPage(
                                         width = 330, style='background-color: #eaf2f8',
                                         
                                         
-                                        tags$h6(tags$i(tags$b("You can click any country on the map to view the total cost to vaccinate and other information based on the currently selected radio button below. The chart below will also update based on your choice
+                                        tags$h6(tags$i(tags$b("You can click any country on the map to view the total cost to vaccinate and other information based on the currently selected radio button below. The chart below will also update as per your choice
                                             of country on the map."))),
                                         
                                         tags$h6(tags$i(tags$b("Note: If you want to make changes to the input variables used in the calculations to see how different costs change, please go to 
-                                                      `Scenario Analysis and Immunization Comparison` tab in this app. You can also visualize and make changes to 
+                                                      `Scenario Analysis and Immunization Comparison` tab. You can also visualize and make changes to 
                                                               Delivery and Procurement costs of vaccine for the country of your choice."))),
                                         
                                         tags$h6(tags$i(tags$b("Choose any of the radio buttons below to see the distrbution of respective costs on the map."))),
@@ -1498,7 +1498,7 @@ ui <- bootstrapPage(
                                         
                                         plotOutput("cost_plot", height = "200px", width = "100%")%>% withSpinner(),
                                         
-                                        tags$h6(tags$i(("The costs shown in the graph are based on our calculation from the baseline data which can be found on `Data Explorer`
+                                        tags$h6(tags$i(("The costs shown in the graph are based on our calculations from the baseline data which can be found on `Data Explorer`
                                tab."))),
                                         
                                         
@@ -1510,7 +1510,7 @@ ui <- bootstrapPage(
                           absolutePanel(id = "logo", class = "card", bottom = 10, left = 370, width = 80, fixed=TRUE, draggable = FALSE, height = "auto",
                                         actionButton("twitter_share", label = "", icon = icon("twitter"),style='padding:10px',
                                                      onclick = sprintf("window.open('%s')", 
-                                                                       "https://twitter.com/intent/tweet?text=%20Check out The Center for Policy Impact in Global Health, based at Duke University, COVID-19 country vaccination cost tracker:&url= https://centerforpolicyimpact.shinyapps.io/covid-vaccination-costs-analysis/%20%20%20&hashtags=coronavirus @DukeCPIGH @DukeGHI @GYamey @sid_dix @DukeU")))
+                                                                       "https://twitter.com/intent/tweet?text=%20Check out the interactive COVID-19 country vaccination cost tracker developed by The Center for Policy Impact in Global Health, based at Duke University, USA:&url= https://centerforpolicyimpact.shinyapps.io/covid-vaccination-costs-analysis/%20%20%20&hashtags=coronavirus @DukeCPIGH @DukeGHI @GYamey @sid_dix @DukeU")))
                           
                       )
              ),
@@ -1712,7 +1712,7 @@ ui <- bootstrapPage(
                         a(href= "https://globalhealth.duke.edu/people/yamey-gavin", target="_blank", "Gavin Yamey,"), "Director, The Center for Policy Impact in Global Health, Duke University",tags$br(),
                         tags$br(),tags$h4("Contact"),
                         "cpigh@duke.edu",tags$br(),tags$br(),
-                        tags$a(href='https://centerforpolicyimpact.org/', target="_blank" , tags$img(src = "CPIGH_Logo.png", width = "350px")),tags$br(), tags$br(),
+                        tags$a(href='https://centerforpolicyimpact.org/', target="_blank" , tags$img(src = "CPIGH_Logo.png", width = "350px")),
                         
                         tags$a(href='https://globalhealth.duke.edu/', target="_blank",tags$img(src = "dghi_logo.jpg", width = "250px"))
                       )
