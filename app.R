@@ -1420,11 +1420,12 @@ imu_cost_plot <- function(country_name_imu,cost_type_vaccine_imu, delivery_cost_
   }
 }    
 
-ui <- bootstrapPage(
+ui <- tagList(bootstrapPage(
   useShinyjs(),
+
   navbarPage(title = "", inverse = TRUE, 
              
-             tabPanel("COVID-19 Vaccination Cost Map", 
+             tabPanel(title = "COVID-19 Vaccination Cost Map", value = "cmap19",
                       
                       div(class = "outer",
                           tags$head(
@@ -1454,11 +1455,10 @@ ui <- bootstrapPage(
                                         tags$h6(tags$i(tags$b("You can click any country on the map to view the total cost to vaccinate and other information based on the currently selected radio button below. The chart below will also update as per your choice
                                             of country on the map."))),
                                         
-                                        tags$h6(tags$i(tags$b("Note: If you want to make changes to the input variables used in the calculations to see how different costs change, please go to 
-                                                      `Scenario Analysis and Immunization Comparison` tab. You can also visualize and make changes to 
-                                                              Delivery and Procurement costs of vaccine for the country of your choice on this tab."))),
+                                        tags$h6(tags$b(tags$i("Note:")), tags$i("If you want to make changes to the input variables used in the calculations to see how different costs change, please go to", 
+                                                                                shinyLink(to="scenario", "Scenario Analysis and Immunization Comparison"),tags$i("tab."))),
                                         
-                                        tags$h6(tags$i(tags$b("Choose any of the radio buttons below to see the distrbution of respective costs on the map."))),
+                                        tags$h6(tags$i(("Choose any of the radio buttons below to see the distrbution of respective costs on the map."))),
                                         
                                         div(style = "margin-top:-5px"),
                                         
@@ -1489,17 +1489,15 @@ ui <- bootstrapPage(
                                         selectInput("country", "",choices = NULL, width = "150px"),
                                         
                                         div(style = "margin-top:-17px"),
-                                        
-                                        # radioGroupButtons("scales", label = "", choices = c("Linear", "Log"),  selected = "Log", size = "xs",
-                                        #                   status = "primary"),
-                                        
-                                        #div(style = "margin-top:-15px"),
-                                        
+                                   
                                         plotOutput("cost_plot", height = "200px", width = "100%")%>% withSpinner(),
                                         
-                                        tags$h6(tags$i(("The costs shown in the graph are based on our calculations from the baseline data which can be found on `Data Explorer`
-                               tab."))),
+                                        tags$h6(tags$i("For breakdown on Procurement and Delivery costs, please go to",
+                                                       shinyLink(to="scenario", "Scenario Analysis and Immunization Comparison"), tags$i("tab."))),
                                         
+                                        #tags$p("Visit the", shinyLink(to = "scenario", "Scenario Page"), "to view the magic" ),
+                                        
+                                        tags$h6(tags$i("*This site is best viewed on Google Chrome, Microsoft Edge, and Microsoft Explorer"))
                                         
                           ),
                           
@@ -1514,7 +1512,7 @@ ui <- bootstrapPage(
                       )
              ),
              
-             tabPanel("Scenario Analysis and Immunization Comparison",
+             tabPanel(title = "Scenario Analysis and Immunization Comparison", value = "scenario",
                       
                       sidebarLayout(
                         
@@ -1576,7 +1574,7 @@ ui <- bootstrapPage(
                                     trigger = "focus",
                                     options = list(container = "body")
                           ),
-                          
+             
                           actionButton("imu_button", "Click to input your data!",
                                        icon("paper-plane"),
                                        style="color: #fff; background-color: #337ab7; border-color: #2e6da4"),
@@ -1604,7 +1602,7 @@ ui <- bootstrapPage(
                                           content=paste("The default value here is the percentage of high risk population",
                                                         "in the selected country based on data by Clark et al. 2020. You can input a different",
                                                         "value to get new cost of vaccinating high-risk population in the selected country.",
-                                                        "Changes in the value here will update the cost for at-risk population in the chart.",
+                                                        "Changes in the value here will update the vaccination cost for high-risk population in the chart.",
                                                         "The table below the chart will also get updated to the new values."),
                                           placement = "top",
                                           trigger = "focus",
@@ -1619,7 +1617,7 @@ ui <- bootstrapPage(
                                           content=paste("The default value here is the number of health professionals",
                                                         "in the selected country based on our calculations. You can input a different",
                                                         "value to get new cost of vaccinating all health professionals in the selected country.",
-                                                        "Changes in the value here will update the cost for health professionals in the chart.",
+                                                        "Changes in the value here will update the vaccination cost for health professionals in the chart.",
                                                         "The table below the chart will also get updated to the new values."),
                                           placement = "top",
                                           trigger = "focus",
@@ -1685,7 +1683,7 @@ ui <- bootstrapPage(
                       )
              ),
              
-             tabPanel("Data Explorer",
+             tabPanel(title = "Data Explorer", value = "data",
                       fluidPage(
                         checkboxInput("show_rownames",
                                       label = "Show rownames?"),
@@ -1695,7 +1693,7 @@ ui <- bootstrapPage(
                         DTOutput("data_explorer"))
              ),
               
-             tabPanel("About This Site",
+             tabPanel(title = "About This Site", value = "about",
                       tags$div(
                         tags$br(),tags$h4(tags$b("Background")),
                         "Safe and effective vaccines are essential to ending the COVID-19 pandemic. 
@@ -1723,7 +1721,9 @@ ui <- bootstrapPage(
                         tags$a(href='https://globalhealth.duke.edu/', target="_blank",tags$img(src = "dghi_logo.jpg", width = "250px"))
                       )
              )
-  )
+  ),
+  tags$script(src = "shinyLink.js")
+)
 )
 
 server <- function(input, output, session) {
