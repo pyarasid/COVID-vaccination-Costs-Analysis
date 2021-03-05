@@ -1156,7 +1156,7 @@ ui <- tagList(bootstrapPage(
                               cost, and different COVID-19 vaccination costs for the selected country in this panel."))),
                           
                           tags$h6(tags$i(tags$b("Note:"),tags$i("You can also input your data for the variables on number of health professionals, high-risk population, 
-                                                number of doses, bilateral vaccine procurement cost, and vaccine delivery cost by clicking on"),tags$i(tags$b("`Click to your input data!`")), tags$i("button below."))),
+                                                number of doses, bilateral vaccine procurement cost, and vaccine delivery cost by clicking on"),tags$i(tags$b("`Click to input your data!`")), tags$i("button below."))),
                           
                           tags$h6(tags$i(("The costs in the chart, and the table below the chart will update based on your input data. The average annual immunization cost remains fixed as the country has already incurred this cost."))),
                           
