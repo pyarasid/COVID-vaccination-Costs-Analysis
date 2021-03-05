@@ -1497,7 +1497,7 @@ ui <- tagList(bootstrapPage(
                                         
                                         #tags$p("Visit the", shinyLink(to = "scenario", "Scenario Page"), "to view the magic" ),
                                         
-                                        tags$h6(tags$i("*This site is best viewed on Google Chrome, Microsoft Edge, and Microsoft Explorer"))
+                                        tags$h6(tags$i("*This site is best viewed on Google Chrome, Microsoft Edge, and Microsoft Explorer."))
                                         
                           ),
                           
