@@ -1158,7 +1158,11 @@ ui <- tagList(bootstrapPage(
                           tags$h6(tags$i(tags$b("Note:"),tags$i("You can also input your data for the variables on number of health professionals, high-risk population, 
                                                 number of doses, bilateral vaccine procurement cost, and vaccine delivery cost by clicking on"),tags$i(tags$b("`Click to input your data!`")), tags$i("button below."))),
                           
-                          tags$h6(tags$i(("The costs in the chart, and the table below the chart will update based on your input data. The average annual immunization cost remains fixed as the country has already incurred this cost."))),
+                          tags$h6(tags$i("The costs in the chart, and the table below the chart will update based on your input data. The average annual immunization cost remains fixed as the country has already incurred this cost.")),
+                          
+                          tags$h6(tags$i("The vaccine procurement cost per dose used were $3 for 20% of the population in COVAX eligible countries, and US$9.95 for bilateral deals for the cost calculations. 
+                                         The $9.95 is the median price per dose for available vaccines.")),
+                          
                           
                           selectInput("imu_cost_type", h5("Select type of cost borne by the country:",
                                                           tags$style(type="text/css", "#q7 {vertical-align: top;}"),
@@ -1271,7 +1275,7 @@ ui <- tagList(bootstrapPage(
                                           options = list(container = "body")
                                 ),
                                 
-                                numericInput("imu_Vac_bilateral",label = h5("Procurement cost per dose (2020 $US):",
+                                numericInput("imu_Vac_bilateral",label = h5("Vaccine procurement cost per dose (2020 $US):",
                                                                             tags$style(type="text/css", "#q12_2 {vertical-align: top;}"),
                                                                             bsButton("q12_2", label="", icon=icon("question"), style="info", size="extra-small")),
                                              min = 0, value = 0, step = .01),
@@ -1285,7 +1289,7 @@ ui <- tagList(bootstrapPage(
                                           options = list(container = "body")
                                 ),
                                 
-                                numericInput("imu_delivery_vaccine", label = h5("Delivery cost per dose (2020 $US):",
+                                numericInput("imu_delivery_vaccine", label = h5("Vaccine delivery cost per dose (2020 $US):",
                                                                                 tags$style(type="text/css", "#q13 {vertical-align: top;}"),
                                                                                 bsButton("q13", label="", icon=icon("question"), style="info", size="extra-small")),
                                              min = 0, value = 0, step = 0.01),
