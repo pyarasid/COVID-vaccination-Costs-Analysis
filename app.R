@@ -51,6 +51,32 @@ addUnits <- function(n) {
 
 mill <-  scales::unit_format(unit = "M", scale = 1e-6, accuracy = .01)
 
+
+js <- "
+function openFullscreen(elem) {
+  if (elem.requestFullscreen) {
+    elem.requestFullscreen();
+  } else if (elem.mozRequestFullScreen) { /* Firefox */
+    elem.mozRequestFullScreen();
+  } else if (elem.webkitRequestFullscreen) { /* Chrome, Safari and Opera */
+    elem.webkitRequestFullscreen();
+  } else if (elem.msRequestFullscreen) { /* IE/Edge */
+    elem.msRequestFullscreen();
+  }
+}"
+
+css <- "
+#imu_cost_plot:-webkit-full-screen {
+  height: 100%;
+  margin: 0;
+}
+#imu_cost_plot:-ms-fullscreen {
+  height: 100%;
+}
+#imu_cost_plot:fullscreen {
+  height: 100%;
+}"
+
 #Creating function for bar chart 
 cost_plot <- function(country_name, vaccine_cost_cvx){
 
@@ -1150,6 +1176,8 @@ ui <- tagList(bootstrapPage(
                         
                         sidebarPanel(
                           tags$head( tags$style(".well {background-color:#ECF0F1;} "),
+                                     tags$script(HTML(js)),
+                                     tags$style(HTML(css))
                           ),
                           
                           tags$h6(tags$i(tags$b("The chart on the right shows the comparison between average annual immunization
@@ -1310,10 +1338,15 @@ ui <- tagList(bootstrapPage(
                         mainPanel(
                           
                           plotOutput("imu_cost_plot")%>% withSpinner(),
-                          div(style = "margin-top:-35px"),
-                          radioGroupButtons("imu_scales", label = "", choices = c("Linear", "Log"), selected = "Linear", size="xs"),
+                          div(style = "margin-top:-20px"),
+                    
+                          div(style="display:inline-block",radioGroupButtons("imu_scales", label = "", choices = c("Linear", "Log"), selected = "Linear", size="xs")),
+                          div(style="display:inline-block", actionButton(
+                            "fs", "Full screen", 
+                            onclick = "openFullscreen(document.getElementById('imu_cost_plot'));",  style='padding:2.5px; font-size:75%')),
                           
-                          #tags$br(),
+                          div(style="display:inline-block",downloadButton('ExportPlot', 'Export as png', style='padding:2px; font-size:75%')),
+                          
                           tags$br(),
                           tableOutput("user_table"))
                       )
@@ -1949,10 +1982,24 @@ server <- function(input, output, session) {
     toggle('show_hide')
   })
   
-  output$imu_cost_plot <- renderPlot({
+  
+  plotInput <- function(){
     imu_cost_plot(input$imu_country_name,input$imu_cost_type, input$imu_delivery_vaccine, input$imu_cvx_check, input$imu_Vac_bilateral,
                   input$imu_health_worker, input$imu_risk_pop, input$imu_doses_num, input$imu_scales)
+    
+  }
+  
+  output$imu_cost_plot <- renderPlot({
+         plotInput()
   })
+  
+  output$ExportPlot <- downloadHandler(
+    filename = function(){
+      paste("COVID19_VacCost",input$imu_country_name, "png", sep = ".")
+    },
+    content = function(file) {
+      ggsave(file, plotInput(), width = 12, height = 6, dpi = 500)
+    })  
   
 }
 
