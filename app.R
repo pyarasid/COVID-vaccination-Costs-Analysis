@@ -51,32 +51,6 @@ addUnits <- function(n) {
 
 mill <-  scales::unit_format(unit = "M", scale = 1e-6, accuracy = .01)
 
-
-js <- "
-function openFullscreen(elem) {
-  if (elem.requestFullscreen) {
-    elem.requestFullscreen();
-  } else if (elem.mozRequestFullScreen) { /* Firefox */
-    elem.mozRequestFullScreen();
-  } else if (elem.webkitRequestFullscreen) { /* Chrome, Safari and Opera */
-    elem.webkitRequestFullscreen();
-  } else if (elem.msRequestFullscreen) { /* IE/Edge */
-    elem.msRequestFullscreen();
-  }
-}"
-
-css <- "
-#imu_cost_plot:-webkit-full-screen {
-  height: 100%;
-  margin: 0;
-}
-#imu_cost_plot:-ms-fullscreen {
-  height: 100%;
-}
-#imu_cost_plot:fullscreen {
-  height: 100%;
-}"
-
 #Creating function for bar chart 
 cost_plot <- function(country_name, vaccine_cost_cvx){
 
@@ -1176,8 +1150,7 @@ ui <- tagList(bootstrapPage(
                         
                         sidebarPanel(
                           tags$head( tags$style(".well {background-color:#ECF0F1;} "),
-                                     tags$script(HTML(js)),
-                                     tags$style(HTML(css))
+                                     
                           ),
                           
                           tags$h6(tags$i(tags$b("The chart on the right shows the comparison between average annual immunization
@@ -1340,12 +1313,12 @@ ui <- tagList(bootstrapPage(
                           plotOutput("imu_cost_plot")%>% withSpinner(),
                           div(style = "margin-top:-20px"),
                     
-                          div(style="display:inline-block",radioGroupButtons("imu_scales", label = "", choices = c("Linear", "Log"), selected = "Linear", size="xs")),
-                          div(style="display:inline-block", actionButton(
-                            "fs", "Full screen", 
-                            onclick = "openFullscreen(document.getElementById('imu_cost_plot'));",  style='padding:2.5px; font-size:75%')),
-                          
-                          div(style="display:inline-block",downloadButton('ExportPlot', 'Export as png', style='padding:2px; font-size:75%')),
+                          div(style="display:inline-block",
+                              radioGroupButtons("imu_scales", label = "", choices = c("Linear", "Log"), 
+                                                selected = "Linear", size="xs")),
+                 
+                          div(style="display:inline-block",
+                              downloadButton('ExportPlot', 'Export as png', style='padding:2px; font-size:75%')),
                           
                           tags$br(),
                           tableOutput("user_table"))
