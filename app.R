@@ -32,9 +32,6 @@ world_polygon_app <- st_read("world_polygon_app.shp") %>%
   mutate(nam_lng=recode(nam_lng, `Democratic Republic of the Congo`="Congo [DRC]"))%>% 
   select(-c("VCstHPB" , "VCstPRB" , "VC75PBC"))
 
-#updating bilateral vaccine price per dose
-world_polygon_app$VCstDs_b <- 9.95
-
 #getting world_polygon without the geomtry columns i.e get just the dataframe
 world_polygon_nogeom <- st_drop_geometry(world_polygon_app) 
 
@@ -1129,7 +1126,8 @@ ui <- tagList(bootstrapPage(
                                                        shinyLink(to="scenario", "Scenario Analysis and Immunization Comparison"), tags$i("tab."))),
                                         
                                         
-                                        tags$h6(tags$i("*This site is best viewed on Google Chrome, Microsoft Edge, and Microsoft Explorer."))
+                                        tags$h6(tags$i("*This site is best viewed on Google Chrome, Microsoft Edge, and Microsoft Explorer. Refresh the page if you don't
+                                                       see the map."))
                                         
                           ),
                           
@@ -1139,7 +1137,7 @@ ui <- tagList(bootstrapPage(
                           absolutePanel(id = "logo", class = "card", bottom = 10, left = 410, width = 80, fixed=TRUE, draggable = FALSE, height = "auto",
                                         actionButton("twitter_share", label = "", icon = icon("twitter"),style='padding:10px',
                                                      onclick = sprintf("window.open('%s')", 
-                                                                       "https://twitter.com/intent/tweet?text=%20Check out the interactive COVID-19 country vaccination cost tracker developed by The Center for Policy Impact in Global Health, based at Duke University, USA:&url= https://centerforpolicyimpact.shinyapps.io/covid-vaccination-costs-analysis/%20%20%20&hashtags=coronavirus @DukeCPIGH @DukeGHI @GYamey @sid_dix @DukeU")))
+                                                                       "https://twitter.com/intent/tweet?text=%20Check out the interactive COVID-19 country vaccination cost tracker and prediction application developed by The Center for Policy Impact in Global Health, based at Duke University, USA:&url= https://centerforpolicyimpact.shinyapps.io/covid-vaccination-costs-analysis/%20%20%20&hashtags=coronavirus @DukeCPIGH @DukeGHI @GYamey @sid_dix @DukeU")))
                           
                       )
              ),
@@ -1161,8 +1159,8 @@ ui <- tagList(bootstrapPage(
                           
                           tags$h6(tags$i("The costs in the chart, and the table below the chart will update based on your input data. The average annual immunization cost remains fixed as the country has already incurred this cost.")),
                           
-                          tags$h6(tags$i("The vaccine procurement cost per dose used were $3 for 20% of the population in COVAX eligible countries, and US$9.95 for bilateral deals for the cost calculations. 
-                                         The $9.95 is the median price per dose for available vaccines.")),
+                          tags$h6(tags$i("The vaccine procurement cost per dose used were $3 for 20% of the population in COVAX eligible countries, and US$5.25 for bilateral deals for the cost calculations. 
+                                         The $5.25 is the median price per dose for available vaccines.")),
                           
                           
                           selectInput("imu_cost_type", h5("Select type of cost borne by the country:",

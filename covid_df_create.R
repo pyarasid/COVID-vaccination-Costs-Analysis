@@ -18,7 +18,7 @@ per_hrd_cvx <- .22
 per_hrd_blt <- .55
 num_does <- 2
 VCstDse_cvx <- 3
-VCstDse_blt <- 13.6
+VCstDse_blt <- 5.25
 
 #cleaning and wrangling the data
 covid_price_clean <- covid_price %>% 
@@ -144,7 +144,7 @@ covid_price_clean <- covid_price_clean %>%
 world_polygon_new <- left_join(world_polygon, covid_price_clean, by= c(name_long="Country"))
 View(world_polygon_new)
 
-#Removing NA from long i.e. keeping only countries which are in covid_price_clean dataframe
+#Removing NA from long i.e. keeping only countries which are in covid_price_clean data frame
 world_polygon_new <- world_polygon_new %>% 
   filter(!is.na(long)) %>% 
   select(name_long, Cvx_elgiblty,spendImu, spend2020, Year, tot_pop, adult_pop, under_18pop, HghRskPop,  NumHthPrf,
@@ -156,11 +156,11 @@ st_write(world_polygon_new,"world_polygon_app.shp")
 
 #Creating a clean dataframe of covid prices and then write it out as excel============
 `% for herd immunity` <- 70
-`% to be covered by COVAX` <- 22
-`remaining % to reach herd immunity` <- 55
+`% to be covered by COVAX` <- 20
+`remaining % to reach herd immunity` <- 50
 `Number of doses needed` <- 2
 `Vaccine price per dose (COVAX, US$)` <- 3
-`Vaccine price per dose (Bilateral, US$)` <- 9.95
+`Vaccine price per dose (Bilateral, US$)` <- 5.25
 
 baseline_data <- read_excel("COVID 19 vaccine price tag_LIC_V8_01292021.xlsx", sheet = "Results") %>% 
   select(Country,`COVAX AMC eligible?`, `Baseline spending`,`Year`,`Total population`,`Adult population (>18)`,
