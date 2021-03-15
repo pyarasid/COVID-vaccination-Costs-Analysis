@@ -1088,7 +1088,8 @@ ui <- tagList(bootstrapPage(
                                         tags$h6(tags$b(tags$i("Note:")), tags$i("If you want to make changes to the input variables used in the calculations to see how different costs change, please go to", 
                                                                                 shinyLink(to="scenario", "Scenario Analysis and Immunization Comparison"),tags$i("tab."))),
                                         
-                                        tags$h6(tags$i(("Choose any of the radio buttons below to see the distrbution of respective costs on the map."))),
+                                        tags$h6(tags$i(("Choose any of the radio buttons below to see the distrbution of respective costs on the map."),tags$b(" High-income countries are 
+                                                        not included in this analysis."))),
                                         
                                         div(style = "margin-top:-5px"),
                                         
@@ -1097,6 +1098,13 @@ ui <- tagList(bootstrapPage(
                                                                          tags$span(style = "font-size: 12px; color:#262626", "Vaccinate high risk population"), 
                                                                          tags$span(style = "font-size: 12px; color:#262626", "Vaccinate health professionals")),
                                                      choiceValues = c("Vaccinate 70% population", "Vaccinate high risk population", "Vaccinate health professionals")),
+                                        
+                                        div(style = "margin-top:-5px"),
+                                        
+                                        tags$h6(tags$i("Checking the COVAX procurement pricing below includes COVAX prices in cost calculations, thus reducing the vaccination costs 
+                                         for COVAX-AMC eligible countries.")),
+                                        
+                                        div(style = "margin-top:-5px"),
                                         
                                         checkboxInput("cvx_check", h5(tags$span(style="font-size: 12px","Include COVAX procurement pricing"),
                                                                       tags$style(type="text/css", "#q01_1 {vertical-align: top;}"),
@@ -1114,7 +1122,7 @@ ui <- tagList(bootstrapPage(
                                                   options = list(container = "body")
                                         ),
                                         
-                                        div(style = "margin-top:-30px"),
+                                        div(style = "margin-top:-35px"),
                                         
                                         selectInput("country", "",choices = NULL, width = "150px"),
                                         
@@ -1386,10 +1394,10 @@ server <- function(input, output, session) {
   
   filtered_world_polygon <- reactive({
     
-    order_of_75per <- c("Below 65 Million","65 - 145 Million", "145 - 275 Million",
-                        "275 - 650 Million", "Above 650 Million")
-    order_of_risk <- c("Below 4 Million", "4 - 8 Million", "8 - 20 Million", 
-                       "20 - 45 Million", "Above 45 Million")
+    order_of_75per <- c("Below 50 Million","50 - 150 Million", "150 - 300 Million",
+                        "300 - 700 Million", "Above 700 Million")
+    order_of_risk <- c("Below 5 Million", "5 - 10 Million", "10 - 20 Million", 
+                       "20 - 50 Million", "Above 50 Million")
     order_of_health <- c("Below 200 Thousand", "200 - 700 Thousand", "700 Thousand - 2 Million",
                          "2 - 6 Million",
                          "Above 6 Million")
@@ -1411,17 +1419,17 @@ server <- function(input, output, session) {
                VC75PBC= (tot_pop*TtCstDB*num_dos*pr_hrd_c)+(tot_pop*TtCstDB*num_dos*pr_hrd_b)) 
       
       new_updated_polygon <- rbind(remaining_polygon, country_polygon) %>%
-        mutate(cst_rng_75= case_when(VC75PBC<=65000000~ "Below 65 Million",
-                                     VC75PBC>65000000 & VC75PBC<=145000000~"65 - 145 Million",
-                                     VC75PBC>145000000 & VC75PBC<=275000000~"145 - 275 Million",
-                                     VC75PBC>275000000 & VC75PBC<=650000000~"275 - 650 Million",
-                                     VC75PBC>650000000~"Above 650 Million")) %>%
+        mutate(cst_rng_75= case_when(VC75PBC<=50000000~ "Below 50 Million",
+                                     VC75PBC>50000000 & VC75PBC<=150000000~"50 - 150 Million",
+                                     VC75PBC>150000000 & VC75PBC<=300000000~"150 - 300 Million",
+                                     VC75PBC>300000000 & VC75PBC<=700000000~"300 - 700 Million",
+                                     VC75PBC>700000000~"Above 700 Million")) %>%
         mutate(cst_rng_75=factor(cst_rng_75, levels =  order_of_75per)) %>%
-        mutate(cst_rng_rsk=case_when(VCstPRB<=4000000~ "Below 4 Million",
-                                     VCstPRB>4000000 & VCstPRB<=8000000~"4 - 8 Million",
-                                     VCstPRB>8000000 & VCstPRB<=20000000~"8 - 20 Million",
-                                     VCstPRB>20000000 & VCstPRB<=45000000~"20 - 45 Million",
-                                     VCstPRB>45000000~"Above 45 Million")) %>%
+        mutate(cst_rng_rsk=case_when(VCstPRB<=5000000~ "Below 5 Million",
+                                     VCstPRB>5000000 & VCstPRB<=10000000~"5 - 10 Million",
+                                     VCstPRB>10000000 & VCstPRB<=20000000~"10 - 20 Million",
+                                     VCstPRB>20000000 & VCstPRB<=50000000~"20 - 50 Million",
+                                     VCstPRB>50000000~"Above 50 Million")) %>%
         mutate(cst_rng_rsk=factor(cst_rng_rsk, levels =  order_of_risk)) %>%
         mutate(cst_rng_hlth=case_when(VCstHPB<=200000~ "Below 200 Thousand",
                                       VCstHPB>200000 & VCstHPB<=700000~"200 - 700 Thousand",
@@ -1434,10 +1442,10 @@ server <- function(input, output, session) {
       
     }else{
       
-      order_of_75per <- c("Below 65 Million","65 - 145 Million", "145 - 275 Million",
-                          "275 - 650 Million", "Above 650 Million")
-      order_of_risk <- c("Below 4 Million", "4 - 8 Million", "8 - 20 Million", 
-                         "20 - 45 Million", "Above 45 Million")
+      order_of_75per <- c("Below 50 Million","50 - 150 Million", "150 - 300 Million",
+                          "300 - 700 Million", "Above 700 Million")
+      order_of_risk <- c("Below 5 Million", "5 - 10 Million", "10 - 20 Million", 
+                         "20 - 50 Million", "Above 50 Million")
       order_of_health <- c("Below 200 Thousand", "200 - 700 Thousand", "700 Thousand - 2 Million",
                            "2 - 6 Million",
                            "Above 6 Million")
@@ -1460,24 +1468,25 @@ server <- function(input, output, session) {
                VC75PBC=ifelse(Cvx_lgb=="Yes", ((tot_pop*TtCstDC*num_dos*pr_hrd_c)+(tot_pop*TtCstDB*num_dos*pr_hrd_b)),
                               ((tot_pop*TtCstDB*num_dos*pr_hrd_c)+(tot_pop*TtCstDB*num_dos*pr_hrd_b))))
       
-      new_updated_polygon <- rbind(remaining_polygon, country_polygon) %>% 
-        mutate(cst_rng_75= case_when(VC75PBC<=65000000~ "Below 65 Million",
-                                     VC75PBC>65000000 & VC75PBC<=145000000~"65 - 145 Million",
-                                     VC75PBC>145000000 & VC75PBC<=275000000~"145 - 275 Million",
-                                     VC75PBC>275000000 & VC75PBC<=650000000~"275 - 650 Million",
-                                     VC75PBC>650000000~"Above 650 Million")) %>% 
-        mutate(cst_rng_75=factor(cst_rng_75, levels =  order_of_75per)) %>% 
-        mutate(cst_rng_rsk=case_when(VCstPRB<=4000000~ "Below 4 Million",
-                                     VCstPRB>4000000 & VCstPRB<=8000000~"4 - 8 Million",
-                                     VCstPRB>8000000 & VCstPRB<=20000000~"8 - 20 Million",
-                                     VCstPRB>20000000 & VCstPRB<=45000000~"20 - 45 Million",
-                                     VCstPRB>45000000~"Above 45 Million")) %>% 
-        mutate(cst_rng_rsk=factor(cst_rng_rsk, levels =  order_of_risk)) %>% 
+      
+      new_updated_polygon <- rbind(remaining_polygon, country_polygon) %>%
+        mutate(cst_rng_75= case_when(VC75PBC<=50000000~ "Below 50 Million",
+                                     VC75PBC>50000000 & VC75PBC<=150000000~"50 - 150 Million",
+                                     VC75PBC>150000000 & VC75PBC<=300000000~"150 - 300 Million",
+                                     VC75PBC>300000000 & VC75PBC<=700000000~"300 - 700 Million",
+                                     VC75PBC>700000000~"Above 700 Million")) %>%
+        mutate(cst_rng_75=factor(cst_rng_75, levels =  order_of_75per)) %>%
+        mutate(cst_rng_rsk=case_when(VCstPRB<=5000000~ "Below 5 Million",
+                                     VCstPRB>5000000 & VCstPRB<=10000000~"5 - 10 Million",
+                                     VCstPRB>10000000 & VCstPRB<=20000000~"10 - 20 Million",
+                                     VCstPRB>20000000 & VCstPRB<=50000000~"20 - 50 Million",
+                                     VCstPRB>50000000~"Above 50 Million")) %>%
+        mutate(cst_rng_rsk=factor(cst_rng_rsk, levels =  order_of_risk)) %>%
         mutate(cst_rng_hlth=case_when(VCstHPB<=200000~ "Below 200 Thousand",
                                       VCstHPB>200000 & VCstHPB<=700000~"200 - 700 Thousand",
                                       VCstHPB>700000 & VCstHPB<=2000000~"700 Thousand - 2 Million",
                                       VCstHPB>2000001 & VCstHPB<=6000000~"2 - 6 Million",
-                                      VCstHPB>6000000~"Above 6 Million")) %>% 
+                                      VCstHPB>6000000~"Above 6 Million")) %>%
         mutate(cst_rng_hlth=factor(cst_rng_hlth, levels =  order_of_health))
       
       return (new_updated_polygon)
