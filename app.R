@@ -1101,8 +1101,8 @@ ui <- tagList(bootstrapPage(
                                         
                                         div(style = "margin-top:-5px"),
                                         
-                                        tags$h6(tags$i("Checking the COVAX procurement pricing below includes COVAX prices in cost calculations, thus reducing the vaccination costs 
-                                         for COVAX-AMC eligible countries.")),
+                                        tags$h6(tags$i("Checking the COVAX procurement pricing below includes COVAX price of $3 for 20% of population in cost calculations for COVAX
+                                                       eligible countries.")),
                                         
                                         div(style = "margin-top:-5px"),
                                         
