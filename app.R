@@ -1353,6 +1353,8 @@ ui <- tagList(bootstrapPage(
                         Because of the rapid changing nature of the pandemic and the uncertainty around our primary input variables, we provide the users with the ability to change the input variables for target populations, vaccine procurement and delivery prices.",
                         tags$br(),tags$br(),tags$h4(tags$b("Code")),
                         "Code and input data used to generate this tool are available on", a(href="https://github.com/pyarasid/COVID-vaccination-Costs-Analysis", target="_blank" ,  "Github."),
+                        tags$br(),tags$br(),tags$h4(tags$b("Paper pre-print")),
+                        "More information on the methodology used to calculate the vaccination costs can be found from our", a(href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3824690", target="_blank", "paper."),
                         tags$br(),tags$br(),tags$h4(tags$b("Selected Primary Data References")),
                         "1- Clark A, Jit M, Warren-Gash C, et al. Global, regional, and national estimates of the population at increased risk of severe COVID-19 due to underlying health conditions in 2020: a modelling study. The Lancet Global Health 2020; 8(8): e1003-e17.",tags$br(),
                         "2- Portnoy A, Vaughan K, Clarke-Deelder E, et al. Producing standardized country-level immunization delivery unit cost estimates. PharmacoEconomics 2020; 38(9): 995-1005.",tags$br(),
